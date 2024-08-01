@@ -3,15 +3,16 @@
   <head>
     <meta charset="ISO-8859-1" />
     <title>Insert title here</title>
-    <link href="./output.css" rel="stylesheet" />
-    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="global.css" />
   </head>
-  <body class="bg-teal-500 w-screen h-screen">
-    <p class="bg-purple-700 underline text-5xl">Hello</p>
-	<body>
-		<h1 class="text-3xl font-bold underline">
-		  Hello world!
-		</h1>
-		<p class="bg-blue-400">Hola</p>
+
+  <body id="body" class="w-full h-full bg-bg text-[--text] flex flex-col items-center justify-center min-h-screen">
+    <button id="openModalBtn" class="bg-[--secondary] p-2 mx-5 font-semibold text-2xl text-white">Sign In</button>
+
+    <!-- For Auth Modal -->
+    <div id="modal"/> 
+
+    <script src="./auth.js"></script>
   </body>
 </html>

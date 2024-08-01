@@ -9,4 +9,14 @@
     <welcome-file>default.jsp</welcome-file>
     <welcome-file>default.htm</welcome-file>
   </welcome-file-list>
+  <servlet>
+    <description></description>
+    <display-name>authServlet</display-name>
+    <servlet-name>authServlet</servlet-name>
+    <servlet-class>auth.authServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>authServlet</servlet-name>
+    <url-pattern>/authServlet</url-pattern>
+  </servlet-mapping>
 </web-app>
