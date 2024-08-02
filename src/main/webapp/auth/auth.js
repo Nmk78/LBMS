@@ -16,7 +16,7 @@ const getModalContent = (mode) => `
   <div id="" class="fixed inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center">
     <div class="relative bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
       <button id="authClose" class="absolute top-4 right-5 hover:bg-gray-300 rounded-sm px-4 py-2">
-        ❌
+        Close
       </button>
       <h1 class="text-2xl font-bold mb-6 text-center text-[--secondary]">${
         mode === "SignUp" ? "Sign Up" : mode === "SignIn" ? "Sign In" : "Error"

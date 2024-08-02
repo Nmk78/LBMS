@@ -7,12 +7,16 @@
     <link rel="stylesheet" href="global.css" />
   </head>
 
-  <body id="body" class="w-full h-full bg-bg text-[--text] flex flex-col items-center justify-center min-h-screen">
-    <button id="openModalBtn" class="bg-[--secondary] p-2 mx-5 font-semibold text-2xl text-white">Sign In</button>
+  <body id="body" class="w-full h-full bg-bg text-[--text] flex flex-col min-h-screen">
+    <!-- For nav Bar -->
+    <div id="nav"></div>
+
+    <button id="openModalBtn" class="bg-[--secondary] w-40 p-2 mx-5 font-semibold text-2xl text-white">Sign In</button>
 
     <!-- For Auth Modal -->
-    <div id="modal"/> 
+    <div id="modal"></div> 
 
-    <script src="./auth.js"></script>
+    <script src="./auth/auth.js"></script>
+    <script src="./nav.js"></script>
   </body>
 </html>
