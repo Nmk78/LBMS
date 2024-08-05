@@ -9,6 +9,10 @@
 
  */
 
+// function(mode){
+//   return innerhtml with modex
+// }
+
 const openModalBtn = document.getElementById("openModalBtn");
 const modal = document.getElementById("modal");
 
@@ -33,20 +37,25 @@ const getModalContent = (mode) => `
         ${
           mode == "SignUp"
             ? `
-            <div>
-              <label
-                for="id"
-                class="block text-sm font-medium text-[--secondary]"
-              >
-                KPTMYK
-              </label>
-              <input
-                type="text"
-                id="id"
-                name="id"
-                class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]"
-              />
+            <div class="flex">
+                <select
+                  id="idType"
+                  name="idType"
+                  class="mt-1 w-1/3 p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]"
+                >
+                  <option value="KPTMYK">KPTMYK</option>
+                  <option value="staff">Staff</option>
+                </select>
+                <input
+                  type="text"
+                  id="id"
+                  name="id"
+                  class="mt-1 p-2 w-2/3 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]"
+                  placeholder="Enter ID or Department"
+                />
             </div>
+
+            
             <input type="hidden" name="mode" value="SignUp">
           `
             : `<input type="hidden" name="mode" value="SignIn">`
@@ -102,13 +111,3 @@ const authModalToggler = (mode) => {
 openModalBtn.addEventListener("click", () =>
   authModalToggler(openModalBtn.textContent.trim().replace(" ", ""))
 );
-
-// Check URL on page load and initialize modal if needed
-window.addEventListener("load", () => {
-  const params = new URLSearchParams(window.location.search);
-  const mode = params.get("mode");
-  if (mode) {
-    authModalToggler(mode);
-  }
-});
-

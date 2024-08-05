@@ -1,10 +1,15 @@
 @charset "ISO-8859-1";
 
-:root{
-	--text: #0d0d0d;
---bg: #ededed;
---primary: #4cf0eb;
---secondary: #00039e;
---accent: #02ed1e;
-	
+:root {
+  --text: #0d0d0d;
+  --bg: #ededed;
+  --shadow: #cdcdcd;
+  --primary: #4cf0eb;
+  --secondary: #00039e;
+  --accent: #02ed1e;
+  --danger: #fa971e;
+
+  --cardWidth : 350px;
+  --cardHeigth : 450px;
+
 }
