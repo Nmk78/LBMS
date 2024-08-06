@@ -1,134 +1,108 @@
 package auth;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import jakarta.servlet.ServletException;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import utils.DB_connection;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.*;
 
-/**
- * Servlet implementation class authServlet
- */
-//@WebServlet("/authServlet")
 public class authServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    /**
-     * Default constructor.
-     */
     public authServlet() {
         super();
     }
 
-    /**
-     * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-     */
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-//        response.setContentType("text/html");
-//
-//        PrintWriter out = response.getWriter();
-//        String name = request.getParameter("name");
-//        String email = request.getParameter("email");
-//        String password = request.getParameter("password");
-//
-//        String sql = "INSERT INTO Users (name, email, password) VALUES (?, ?, ?)";
-//        out.println("Data inserting....!1");
-//
-////        try (Connection conn = DB_connection.getConnection();
-////             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-////            out.println("Data inserting....!2");
-////
-////            pstmt.setString(1, name);
-////            pstmt.setString(2, email);
-////            pstmt.setString(3, password);
-////
-////            int rowsAffected = pstmt.executeUpdate();
-////
-////            if (rowsAffected > 0) {
-////                out.println("Data inserted successfully!");
-////            } else {
-////                out.println("Failed to insert data.");
-////            }
-////
-////        } catch (SQLException e) {
-////            e.printStackTrace();
-////            out.println("Error: " + e.getMessage());
-////        }
-//
-//        HttpSession session = request.getSession();
-//        session.setAttribute("name", name);
-//        session.setAttribute("email", email);
-//        session.setAttribute("password", password);
-//
-//        out.println("<html>");
-//        out.println("<head><title>User Info</title></head>");
-//        out.println("<body bgcolor='white'>");
-//        out.println("<center><h2>User Information</h2>");
-//        out.println("<ul>");
-//        out.println("<li>Name: " + name + "</li>");
-//        out.println("<li>Email: " + email + "</li>");
-//        out.println("<li>Password: " + password + "</li>");
-//        out.println("</ul>");
-//        out.println("</center></body>");
-//        out.println("</html>");
-//    }
+        HttpSession session = request.getSession();
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
 
-    	response.setContentType("text/html"); 
-        PrintWriter pw = response.getWriter(); 
-        pw.println("<h1>Hello</h1>");
+        String name = request.getParameter("name");
+        String mode = request.getParameter("mode");
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+        String idOrDept = request.getParameter("idOrDept");
+        String role = request.getParameter("userType");
+
+        String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
+
+        String signUpQuery = "INSERT INTO Users (name, email, password, department, role) VALUES (?, ?, ?, ?, ?)";
+        String signInQuery = "SELECT password FROM Users WHERE email = ?";
 
         try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/lbms", "root", "root");
 
-        Class.forName("com.mysql.cj.jdbc.Driver");
+            if ("SignUp".equals(mode)) {
+                PreparedStatement pstmt = conn.prepareStatement(signUpQuery);
+                pstmt.setString(1, name);
+                pstmt.setString(2, email);
+                pstmt.setString(3, hashedPassword);
+                pstmt.setString(4, idOrDept);
+                pstmt.setString(5, role);
 
-        pw.println("<h1> LoadDriver***</h1>");
+                int rowsAffected = pstmt.executeUpdate();
+                if (rowsAffected > 0) {
+                    session.setAttribute("name", name);
+                    session.setAttribute("email", email);
+                    session.setAttribute("role", role);
+                    out.println("Sign up successful!");
+                } else {
+                    out.println("Failed to sign up.");
+                }
+                pstmt.close();
+            } else if ("SignIn".equals(mode)) {
+                PreparedStatement pstmt = conn.prepareStatement(signInQuery);
+                pstmt.setString(1, email);
+                ResultSet resultSet = pstmt.executeQuery();
 
-        java.sql.Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3 306/userdb", "root", "password");
+                if (resultSet.next()) {
+                    String storedHashedPassword = resultSet.getString("password");
+                    boolean passwordMatch = BCrypt.checkpw(password, storedHashedPassword);
 
-        pw.println("<h1>Connection is established</h1>");
+                    if (passwordMatch) {
+                        session.setAttribute("name", name);
+                        session.setAttribute("email", email);
+                        session.setAttribute("role", role);
+                        out.println("Login successful!");
+                    } else {
+                        out.println("Invalid email or password.");
+                    }
+                } else {
+                    out.println("Invalid email or password.");
+                }
+                resultSet.close();
+                pstmt.close();
+            } else {
+                out.println("ERROR: Unspecified Type.");
+            }
 
-        Statement stmt = conn.createStatement();
-
-        ResultSet rs = stmt.executeQuery("select * from users"); //Step 4
-
-        while (rs.next()) {
-
-        int id = rs.getInt("id");
-
-        String email = rs.getString("email");
-
-        String password = rs.getString("password");
-
-        String fullname = rs.getString("fullname");
-
-        pw.println(id + "\t" + email +"\t"+ password + "\t" + fullname);
-
-        pw.println("<br>");
-        
+            conn.close();
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+            out.println("Error: " + e.getMessage());
         }
 
-        stmt.close(); //Step 5 conn.close(); //Step 6
-        conn.close();
-        }catch(SQLException e) {
+        out.println("<html>");
+        out.println("<head><title>User Info</title></head>");
+        out.println("<body bgcolor='white'>");
+        out.println("<center><h2>User Information</h2>");
+        out.println("<ul>");
+        out.println("<li>Name: " + session.getAttribute("name") + "</li>");
+        out.println("<li>Email: " + session.getAttribute("email") + "</li>");
+        out.println("<li>Role: " + session.getAttribute("role") + "</li>");
+        out.println("</ul>");
+        out.println("</center></body>");
+        out.println("</html>");
+    }
 
-        e.printStackTrace();
-
-        }
-
-        catch (ClassNotFoundException e) { 
-        	e.printStackTrace();
-        }
-        }
-    /**
-     * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-     */
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doGet(request, response);
     }

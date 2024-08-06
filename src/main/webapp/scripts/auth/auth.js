@@ -37,10 +37,12 @@ const getModalContent = (mode) => `
         ${
           mode == "SignUp"
             ? `
-            <div class="flex">
+			<div>
+			<label for="userType" class="block text-sm font-medium text-[--secondary]">User Type</label>
+            <div class="flex mt-1">
                 <select
-                  id="idType"
-                  name="idType"
+                  id="userType"
+                  name="userType"
                   class="mt-1 w-1/3 p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]"
                 >
                   <option value="KPTMYK">KPTMYK</option>
@@ -48,14 +50,13 @@ const getModalContent = (mode) => `
                 </select>
                 <input
                   type="text"
-                  id="id"
-                  name="id"
+                  id="idOrDept"
+                  name="idOrDept"
                   class="mt-1 p-2 w-2/3 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]"
                   placeholder="Enter ID or Department"
                 />
-            </div>
+            </div></div>
 
-            
             <input type="hidden" name="mode" value="SignUp">
           `
             : `<input type="hidden" name="mode" value="SignIn">`
@@ -69,9 +70,11 @@ const getModalContent = (mode) => `
         }</button>
       </form>
       <div class="space-y-2 text-xs text-right space-x-1">
-        <span>Doesn't have an account?</span><button id="signUp" class="underline">Sign Up</button>
-        <br>
-        <span>Already have an account?</span><button id="signIn" class="underline">Sign In</button>
+		${
+			mode === 'SignIn' ? `<span>Doesn't have an account?</span><button id="signUp" class="underline">Sign Up</button>`
+        :
+        `<span>Already have an account?</span><button id="signIn" class="underline">Sign In</button>`
+		}
       </div>
     </div>
   </div>
@@ -85,29 +88,40 @@ const updateURL = (mode) => {
 
 const authModalToggler = (mode) => {
   modal.innerHTML = getModalContent(mode);
-
-  document.getElementById("authClose").addEventListener("click", () => {
-    document.getElementById("modal").innerHTML = "";
-    const url = new URL(window.location);
-    url.searchParams.delete("mode");
-    window.history.pushState({}, "", url);
-  });
-
-  document.getElementById("signUp").addEventListener("click", (e) => {
-    e.preventDefault();
-    authModalToggler("SignUp");
-    updateURL("SignUp");
-  });
-
-  document.getElementById("signIn").addEventListener("click", (e) => {
-    e.preventDefault();
-    authModalToggler("SignIn");
-    updateURL("SignIn");
-  });
-
   updateURL(mode);
+
+  const closeBtn = document.getElementById("authClose");
+  const signUpBtn = document.getElementById("signUp");
+  const signInBtn = document.getElementById("signIn");
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      modal.innerHTML = "";
+      const url = new URL(window.location);
+      url.searchParams.delete("mode");
+      window.history.pushState({}, "", url);
+    });
+  }
+
+  if (signUpBtn) {
+    signUpBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      authModalToggler("SignUp");
+    });
+  }
+
+  if (signInBtn) {
+    signInBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      authModalToggler("SignIn");
+    });
+  }
 };
 
-openModalBtn.addEventListener("click", () =>
-  authModalToggler(openModalBtn.textContent.trim().replace(" ", ""))
-);
+
+if (openModalBtn) {
+  openModalBtn.addEventListener("click", () => {
+    const mode = openModalBtn.textContent.trim().replace(" ", "");
+    authModalToggler(mode);
+  });
+}

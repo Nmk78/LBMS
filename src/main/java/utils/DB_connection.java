@@ -24,7 +24,7 @@ public class DB_connection{
 
 	public static void main(String[] args) throws ClassNotFoundException, SQLException {
 		Class.forName("com.mysql.jdbc.Driver");
-		Connection con = DriverManager.getConnection("jdbc:mysql://localhost/lbms", "root", "root");
+		Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/lbms", "root", "root");
 		Statement st = con.createStatement();
 		ResultSet rs = st.executeQuery("select * from users");
 		
