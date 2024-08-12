@@ -11,6 +11,8 @@
 
 const navContainer = document.getElementById("nav");
 
+let isLoggedIn = localStorage.getItem("isLoggedIn")
+
 const url = new URL(window.location);
 path = url.pathname.split("/");
 currentRoute = path[path.length - 1];
@@ -22,21 +24,21 @@ const navInnerHtml = `      <div id="logo" class="w-1/3">
 
       <div class="flex items-center w-auto h-2/3 space-x-10 mb-2">
         <a
-          href="/#"
+          href="/LBMS/#"
           class="text-[--secondary] font-semibold text-xl hover:underline underline-offset-2 ${currentRoute == "index.html" ? "underline": currentRoute == "" ? "underline": ""}"
           >Home</a
         >
         <a
-          href="/#"
+          href="LBMS/#"
           class="text-[--secondary] font-semibold text-xl hover:underline underline-offset-2 ${currentRoute == "blog.html" ? "underline": ""}"
           >Blog</a
         >        <a
-          href="/#"
+          href="LBMS/#"
           class="text-[--secondary] font-semibold text-xl hover:underline underline-offset-2 ${currentRoute == "blog.html" ? "underline": ""}"
           >Category</a
         >
         <a
-          href="/#"
+          href="LBMS/#"
           class="text-[--secondary] font-semibold text-xl hover:underline underline-offset-2 ${currentRoute == "blog.html" ? "underline": ""}"
           >About</a
         >
@@ -61,13 +63,18 @@ const navInnerHtml = `      <div id="logo" class="w-1/3">
             Search
           </button>
         </form>
-        <button
-          id="openModalBtn"
-          class="h-2/3 border-b-2 py-[5px] px-3 flex items-center border-[--secondary] bg-[--secondary] text-gray-200 text-center"
-
-        >
-          Sign In
-        </button>
+       ${isLoggedIn ? `
+            <a href="/LBMS/user.jsp" id="userProfile" class="h-2/3">
+                <img src="assets/img/sample4.jpg" alt="User Profile" class="w-12 h-12" />
+            </a>
+        ` : `
+            <button
+                id="openModalBtn"
+                class="h-2/3 border-b-2 py-[5px] px-3 flex items-center border-[--secondary] bg-[--secondary] text-gray-200 text-center"
+            >
+                Sign In
+            </button>
+        `}
       </div>`;
 
 navContainer.innerHTML = navInnerHtml;
@@ -100,10 +107,13 @@ const getModalContent = (mode) => `
         mode === "SignUp" ? "Sign Up" : mode === "SignIn" ? "Sign In" : "Error"
       }</h1>
       <form action="authServlet" method="POST" class="space-y-4">
+              ${
+          mode == "SignUp"
+            ? `
         <div>
           <label for="name" class="block text-sm font-medium text-[--secondary]">Name</label>
           <input type="text" id="name" name="name" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]">
-        </div>
+        </div>`:""}
         <div>
           <label for="email" class="block text-sm font-medium text-[--secondary]">Email</label>
           <input type="email" id="email" name="email" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]">
@@ -111,6 +121,10 @@ const getModalContent = (mode) => `
         ${
           mode == "SignUp"
             ? `
+         <div>
+          <label for="phone" class="block text-sm font-medium text-[--secondary]">Phone</label>
+          <input type="tel" id="phone" name="phone" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]">
+        </div>
 			<div>
 			<label for="userType" class="block text-sm font-medium text-[--secondary]">User Type</label>
             <div class="flex mt-1">

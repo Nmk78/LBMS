@@ -11,7 +11,7 @@ const generateCard = (name, image, author, available, id) => {
 			<p id="title" class=" font-bold text-[--text] text-2xl">${name}</p>
 			<div id="AuthorAndAvailablity" class="w-full flex justify-between items-center ">
 				<p id="author" class="font-semibold text-lg text-[--text]">${author}</p>
-				${available ? `<p id="status" class="px-3 py-1 border-2 mt-0 border-dashed border-[--accent] text-md text-[--accent]">Availabale</p>` : `<p id="status" class="px-3 py-1 border-2 mt-0 border-dashed border-[--danger] text-md text-[--danger]">Borrowed</p>`}
+				${available ? `<p id="status" class="px-3 py-1 border-2 mt-0 border-dashed border-[--accent] text-md text-[--accent]">Availabale</p>` : `<p id="status" class="px-3 py-1 border-2 mt-0 border-dashed border-[--warning] text-md text-[--warning]">Borrowed</p>`}
 			</div>
 			<p id="review" class=" line-clamp-2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam recusandae illo sequi provident? Minima explicabo officia cumque animi, velit blanditiis consectetur consequatur molestias cum porro vel exercitationem corporis culpa eius.</p>
 
