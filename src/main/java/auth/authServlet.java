@@ -21,6 +21,7 @@ public class authServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
+        session.setMaxInactiveInterval(60 * 60 * 24 * 30); // Max 30 day session age
         response.setContentType("text/html");
         PrintWriter out = response.getWriter();
 
@@ -81,7 +82,7 @@ public class authServlet extends HttpServlet {
                 resultSet.close();
                 pstmt.close();
             } else {
-                out.println("ERROR: Unspecified Type.");
+                out.println("ERROR: Unspecified Mode.");
             }
 
             conn.close();

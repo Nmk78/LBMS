@@ -1,7 +1,9 @@
 const cardContainer = document.querySelector("#cardContainer");
+const peopleChoices = document.querySelector("#peopleChoices");
+const explore = document.querySelector("#explore");
 
 const generateCard = (name, image, author, available, id) => {
-  return `<a href="${id}" target="_self" id="card" class="w-[--cardWidth] max-w-96 h-[--cardHeigth] bg-[--bg] border-[3px]">
+  return `<a href="${id}" target="_self" id="card" class="min-w-[250px] w-[--cardWidth] max-w-96 md:w-[300px] h-[--cardHeigth] bg-[--bg] border-[3px]">
 		<div id="image" class="w-full h-2/3 overflow-hidden bg-cover">
 			<img class="" src="./assets/img/sample4.jpg" alt="Book">
 		</div>
@@ -107,4 +109,14 @@ const books = [
   books.forEach(book => {
     const cardHTML = generateCard(book.name, book.image, book.author, book.available, book.id);
     cardContainer.innerHTML += cardHTML;
+  });
+  
+  books.forEach(book => {
+    const cardHTML = generateCard(book.name, book.image, book.author, book.available, book.id);
+    peopleChoices.innerHTML += cardHTML;
+  });
+
+  books.forEach(book => {
+    const cardHTML = generateCard(book.name, book.image, book.author, book.available, book.id);
+    explore.innerHTML += cardHTML;
   });
