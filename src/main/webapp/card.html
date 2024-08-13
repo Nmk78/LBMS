@@ -1,18 +1,72 @@
+
 <!DOCTYPE html>
 <html>
   <head>
     <meta charset="ISO-8859-1" />
-    <title>Insert title here</title>
-	<link rel="stylesheet" href="global.css">
-	<script src="https://cdn.tailwindcss.com"></script>
+    <title>Admin | LBMS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+      integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <link rel="stylesheet" href="global.css" />
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav
+      id="nav"
+      class="flex sticky top-0 w-full h-18 py-1 justify-between items-center shadow-0 px-20 shadow-slate-300 bg-[--bg]"
+    ></nav>
+    <div class="flex items-center px-20 justify-between bg-teal-100 p-4">
+      <div class="space-x-6">
+        <button class="px-4 py-2 bg-[--secondary] text-white">
+          Borrow Book
+        </button>
+      </div>
+      <button class="px-4 py-2 text-red-800 hover:text-white hover:bg-red-800">
+        Sign Out
+      </button>
+    </div>
+    <div class="p-6 px-20 space-y-6">
+      <!-- Top Boxes -->
+      <div class="flex space-x-6">
+        <button
+          class="flex items-center max-w-60 space-x-10 justify-between bg-white p-6 shadow-md w-80"
+        >
+          <div class="text-start space-y-4">
+            <div class="text-3xl font-bold">465</div>
+            <div class="text-gray-600">Total Books</div>
+          </div>
+          <div class="w-12 h-12 flex items-center justify-center rounded-full">
+            <div class="text-white text-lg font-bold">
+              <img src="./assets/icons/addBook.svg" alt="Add Book" />
+            </div>
+          </div>
+        </button>
+      </div>
 
-</head>
-  <body class="mx-16 mt-10 bg-[--bg]">
+      <!-- Bottom Content -->
+      <div class="flex space-x-6">
+        <!-- Left Content -->
+        <div class="w-2/3 space-y-4">
+          <div class="h-24 bg-red-300"></div>
+          <div class="h-24 bg-red-300"></div>
+          <div class="h-24 bg-red-300"></div>
+        </div>
 
-    <div id="cardContainer" class="w-[1200px] flex flex-wrap justify-evenly border-black border-2 mx-auto h-full p-5 space-y-5"/>
+        <!-- Right Content -->
+        <div class="w-1/3 space-y-4">
+          <div class="h-20 bg-red-300"></div>
+          <div class="h-20 bg-red-300"></div>
+          <div class="h-20 bg-red-300"></div>
+          <div class="h-20 bg-red-300"></div>
+        </div>
+      </div>
+    </div>
 
-
-
-	<script src="./scripts/book/card.js"></script>
+    <script src="./scripts/innerHtmlInserter.js"></script>
   </body>
 </html>

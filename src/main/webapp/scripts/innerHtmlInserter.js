@@ -16,6 +16,7 @@ let isLoggedIn = localStorage.getItem("isLoggedIn")
 const url = new URL(window.location);
 path = url.pathname.split("/");
 currentRoute = path[path.length - 1];
+
 const navInnerHtml = `      <div id="logo" class="w-1/3">
         <a href="/LBMS/" id="logo" class="w-16 h-16 flex items-center">
           <img src="assets/logo/logo.png" alt="Logo" class="w-16 h-16" />

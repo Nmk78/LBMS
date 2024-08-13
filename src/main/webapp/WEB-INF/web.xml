@@ -9,20 +9,27 @@
     <welcome-file>default.jsp</welcome-file>
     <welcome-file>default.htm</welcome-file>
   </welcome-file-list>
-  
-      <session-config>
-        <session-timeout>2592000</session-timeout>
-    </session-config>
-    
-    <servlet>
-      <description></description>
-      <display-name>authServlet</display-name>
-      <servlet-name>authServlet</servlet-name>
-      <servlet-class>auth.authServlet</servlet-class>
+  <session-config>
+    <session-timeout>2592000</session-timeout>
+  </session-config>
+  <servlet>
+    <description></description>
+    <display-name>authServlet</display-name>
+    <servlet-name>authServlet</servlet-name>
+    <servlet-class>auth.authServlet</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>authServlet</servlet-name>
     <url-pattern>/authServlet</url-pattern>
   </servlet-mapping>
-
+  <servlet>
+    <description></description>
+    <display-name>LogoutServlet</display-name>
+    <servlet-name>LogoutServlet</servlet-name>
+    <servlet-class>auth.LogoutServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>LogoutServlet</servlet-name>
+    <url-pattern>/LogoutServlet</url-pattern>
+  </servlet-mapping>
 </web-app>

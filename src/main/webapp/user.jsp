@@ -7,6 +7,8 @@
     <title>Profile | LBMS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="global.css" />
+    <script type="text/javascript" src="${pageContext.request.contextPath}/scripts/logout.js"></script>
+    
 
 <script>
         // Function to save data to LocalStorage
@@ -25,6 +27,8 @@ function handlePageLoad() {
     var email = "<%= session.getAttribute("email") != null ? session.getAttribute("email").toString() : "" %>";
     var phone = "<%= session.getAttribute("phone") != null ? session.getAttribute("phone").toString() : "" %>";
     var idOrDept = "<%= session.getAttribute("idOrDept") != null ? session.getAttribute("idOrDept").toString() : "" %>";
+
+    if(name && email && phone && idOrDept) {
         console.log("Name:", name || "No Name");
         console.log("Email:", email || "No Email");
         console.log("Phone:", phone || "No Phone");
@@ -35,8 +39,18 @@ function handlePageLoad() {
         saveToLocalStorage('phone', phone);
         saveToLocalStorage('idOrDept', idOrDept);
         saveToLocalStorage('isLoggedIn', true);
+    }else{
+    	console.log("Can't set user data, maybe already exit.")
+    }
 
     }
+
+
+//const logoutBtn = document.getElementById('logoutButton');
+
+//if(logoutBtn){
+	//logoutBtn.addEventListener('click', logout);
+//}
 
 
         // Ensure the function runs when the page loads
@@ -57,7 +71,7 @@ function handlePageLoad() {
     <!-- Profile Container -->
     <div class="max-w-5xl mx-auto mt-10 p-6 bg-white shadow-md">
       <!-- Profile Header -->
-      <div class="flex h-full items-center border-b border-gray-200 pb-4">
+      <div class="flex h-full items-center border-b border-gray-200 pb-4  space-x-5">
         <img
           src="./assets/img/sample4.jpg"
           alt="Profile Picture"
@@ -86,6 +100,9 @@ function handlePageLoad() {
             <p class="text-[--secondary] font-semibold text-xl">Status</p>
             <p class="text-[--danger] font-medium text-md">Over Date</p>
           </div>
+        </div>
+        <div class="h-full flex items-start">
+        	<button id="logoutButton" onclick="logout()" class="bg-[--secondary] py-2 px-3 text-white">Logout</button>
         </div>
       </div>
 
