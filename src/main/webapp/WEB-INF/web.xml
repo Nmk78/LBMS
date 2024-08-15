@@ -12,6 +12,8 @@
   <session-config>
     <session-timeout>2592000</session-timeout>
   </session-config>
+  
+  
   <servlet>
     <description></description>
     <display-name>authServlet</display-name>
@@ -31,5 +33,25 @@
   <servlet-mapping>
     <servlet-name>LogoutServlet</servlet-name>
     <url-pattern>/LogoutServlet</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>bookInsert</display-name>
+    <servlet-name>bookInsert</servlet-name>
+    <servlet-class>Book.bookInsert</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>bookInsert</servlet-name>
+    <url-pattern>/admin</url-pattern>
+  </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>bookUpdateDemo</display-name>
+    <servlet-name>bookUpdateDemo</servlet-name>
+    <servlet-class>Book.bookUpdateDemo</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>bookUpdateDemo</servlet-name>
+    <url-pattern>/bookUpdateDemo</url-pattern>
   </servlet-mapping>
 </web-app>
