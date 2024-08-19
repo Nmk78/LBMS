@@ -10,33 +10,90 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
     />
-
   </head>
-  <body>
-    <div id="nav" class="w-full" />
+  <body class="relative">
+    <nav
+      id="nav"
+      class="flex sticky top-0 w-full h-18 py-1 justify-between items-center shadow-0 px-20 shadow-slate-300 bg-[--bg]"
+    ></nav>
+    <section class="mx-auto sm:px-10 md:px-20 xl:px-60">
+      <div id="modal"></div>
 
-<!-- Slider main container -->
-<div class="swiper">
-  <!-- Additional required wrapper -->
-  <div class="swiper-wrapper">
-    <!-- Slides -->
-    <div class="swiper-slide">Slide 1</div>
-    <div class="swiper-slide">Slide 2</div>
-    <div class="swiper-slide">Slide 3</div>
-    ...
-  </div>
-  <!-- If we need pagination -->
-  <div class="swiper-pagination"></div>
+      <section id="hero" class="w-full h-auto">
+        <img
+          src="./assets/img/sample1.png"
+          alt="Hero Image"
+          class="w-full h-[90%]"
+        />
+      </section>
 
-  <!-- If we need navigation buttons -->
-  <div class="swiper-button-prev"></div>
-  <div class="swiper-button-next"></div>
+      <p class="text-3xl font-semibold text-[--secondary] mt-5 mb-2">
+        Popular Books
+      </p>
 
-  <!-- If we need scrollbar -->
-  <div class="swiper-scrollbar"></div>
-</div>
+      <section
+        id="cardContainer"
+        class="w-full flex flex-wrap justify-between mx-auto h-full mb-5 gap-5"
+      ></section>
+
+      <p class="text-3xl font-semibold text-[--secondary] mt-5 mb-2">
+        People Choices
+      </p>
+
+      <div
+        id="peopleChoices"
+        title="Prople votes for people choices section, update every week"
+        class="w-full min-h-[500px] flex items-center overflow-x-scroll justify-between mx-auto mb-5 py-5 space-x-5"
+      >
+        <!-- <div id="cardContailer" class="h-[500px] space-x-5"></div> -->
+      </div>
+
+      <section id="quote" class="flex justify-center space-x-3 w-full h-80">
+        <div class="w-1/2 flex flex-col justify-center items-end">
+          <pre id="quoteText" class="text-xl font-medium">
+            အဆင့်အတန်းဆိုတာ
+            လူတစ်‌ယောက်က
+            အခြားလူတစ်‌ယောက်အပေါ်မှာ
+            ဘယ်လောက်
+            လေးစားသလဲဆိုတာကို
+            ခေါ်တာ..
+          </pre>
+          <p id="authorName">မြသန်းတင့်</p>
+        </div>
+        <div id="authorImage" class="w-1/2 h-full">
+          <img class="w-auto h-full" src="./assets/img/mtt.jpg" alt="" />
+        </div>
+      </section>
+
+      <div class="w-full flex justify-between items-center mt-5 mb-2">
+        <p class="text-3xl font-semibold text-[--secondary]">Explore</p>
+        <a
+          href="#"
+          class="font-semibold h-10 text-xl text-center text-[--secondary] hover:underline"
+          >See More >></a
+        >
+      </div>
+      <section
+        id="explore"
+        class="w-full flex flex-wrap justify-between mx-auto h-full mb-5 gap-5"
+      ></section>
+
+      <div class="absolute top-1/2 left-1/2">
+        <img src="./assets/loading.gif" />
+      </div>
+
+      <footer
+        id="footer"
+        role="contentinfo"
+        class="pb-20 pt-10 mt-10 border-t-2 border-[--secondary]"
+      >
+
+      </footer>
+    </section>
+
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-element-bundle.min.js"></script>
     <script src="./scripts/initialTasks.js"></script>
-    <script src="./scripts/nav.js"></script>
+    <script src="./scripts/innerHtmlInserter.js"></script>
+    <script src="./scripts/book/card.js"></script>
   </body>
 </html>

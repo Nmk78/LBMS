@@ -20,5 +20,7 @@
 	</classpathentry>
 	<classpathentry kind="lib" path="src/main/webapp/META-INF/lib/mysql-connector-j-8.0.33.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jBCrypt-0.4.1.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jstl-api-1.2.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jstl-impl.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

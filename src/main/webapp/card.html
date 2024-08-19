@@ -1,18 +1,222 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="ISO-8859-1" />
-    <title>Insert title here</title>
-	<link rel="stylesheet" href="global.css">
-	<script src="https://cdn.tailwindcss.com"></script>
-
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Books Table with Search, Sort, and Edit</title>
+    <script src="app.js" defer></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-  <body class="mx-16 mt-10 bg-[--bg]">
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white shadow-md rounded-lg p-6">
+        <div class="flex justify-between items-center mb-4">
+            <input type="text" id="search-input" class="border border-gray-300 rounded-lg py-2 px-4 w-full max-w-xs" placeholder="Search books...">
+        </div>
+        <table class="min-w-full bg-white border border-gray-200">
+            <thead>
+                <tr>
+                    <th class="py-2 px-4 border-b cursor-pointer" data-sort="title">Title</th>
+                    <th class="py-2 px-4 border-b">Image</th>
+                    <th class="py-2 px-4 border-b cursor-pointer" data-sort="author">Author</th>
+                    <th class="py-2 px-4 border-b cursor-pointer" data-sort="category">Category</th>
+                    <th class="py-2 px-4 border-b cursor-pointer" data-sort="available">Available</th>
+                    <th class="py-2 px-4 border-b cursor-pointer" data-sort="id">ID</th>
+                    <th class="py-2 px-4 border-b">Acquired By</th>
+                    <th class="py-2 px-4 border-b"></th>
+                </tr>
+            </thead>
+            <tbody id="books-table-body">
+                <!-- Rows will be injected here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+    
+   <script> 	
+   document.addEventListener('DOMContentLoaded', function () {
+	    const books = [
+	        {
+	            title: 'Book One',
+	            image: './assets/img/sample1.jpg',
+	            author: 'Author One',
+	            category: 'Category One',
+	            available: true,
+	            id: '1',
+	            acquireBy: 'buy',
+	        },
+	        {
+	            title: 'Book Two',
+	            image: './assets/img/sample2.jpg',
+	            author: 'Author Two',
+	            category: 'Category Two',
+	            available: false,
+	            id: '2',
+	            acquireBy: 'rent',
+	        },
+	        {
+	            title: 'Book Three',
+	            image: './assets/img/sample4.jpg',
+	            author: 'Author Three',
+	            category: 'Category Three',
+	            available: true,
+	            id: '3',
+	            acquireBy: 'buy',
+	        },
+	        {
+	            title: 'Book One',
+	            image: './assets/img/sample1.jpg',
+	            author: 'Author One',
+	            category: 'Category One',
+	            available: true,
+	            id: '1',
+	            acquireBy: 'buy',
+	        },
+	        {
+	            title: 'Book Two',
+	            image: './assets/img/sample2.jpg',
+	            author: 'Author Two',
+	            category: 'Category Two',
+	            available: false,
+	            id: '2',
+	            acquireBy: 'rent',
+	        },
+	        {
+	            title: 'Book Three',
+	            image: './assets/img/sample4.jpg',
+	            author: 'Author Three',
+	            category: 'Category Three',
+	            available: true,
+	            id: '3',
+	            acquireBy: 'buy',
+	        },
+	        {
+	            title: 'Book One',
+	            image: './assets/img/sample1.jpg',
+	            author: 'Author One',
+	            category: 'Category One',
+	            available: true,
+	            id: '1',
+	            acquireBy: 'buy',
+	        },
+	        {
+	            title: 'Book Two',
+	            image: './assets/img/sample2.jpg',
+	            author: 'Author Two',
+	            category: 'Category Two',
+	            available: false,
+	            id: '2',
+	            acquireBy: 'rent',
+	        },
+	        {
+	            title: 'Book Three',
+	            image: './assets/img/sample4.jpg',
+	            author: 'Author Three',
+	            category: 'Category Three',
+	            available: true,
+	            id: '3',
+	            acquireBy: 'buy',
+	        },
+	        {
+	            title: 'Book One',
+	            image: './assets/img/sample1.jpg',
+	            author: 'Author One',
+	            category: 'Category One',
+	            available: true,
+	            id: '1',
+	            acquireBy: 'buy',
+	        },
+	        {
+	            title: 'Book Two',
+	            image: './assets/img/sample2.jpg',
+	            author: 'Author Two',
+	            category: 'Category Two',
+	            available: false,
+	            id: '2',
+	            acquireBy: 'rent',
+	        },
+	        {
+	            title: 'AAA',
+	            image: './assets/img/sample4.jpg',
+	            author: 'Author Three',
+	            category: 'Category Three',
+	            available: true,
+	            id: '3',
+	            acquireBy: 'buy',
+	        },
+	    ];
 
-    <div id="cardContainer" class="w-[1200px] flex flex-wrap justify-evenly border-black border-2 mx-auto h-full p-5 space-y-5"/>
+	    let sortedBooks = [...books];
+	    let sortOrder = {};
 
+	    const tableBody = document.getElementById('books-table-body');
+	    const searchInput = document.getElementById('search-input');
 
+	    function renderTable(data) {
+	        tableBody.innerHTML = '';
+	        data.forEach(book => {
+	            const row = document.createElement('tr');
+	            row.classList.add('border-b', 'hover:bg-gray-100');
 
-	<script src="./scripts/book/card.js"></script>
-  </body>
+	            row.innerHTML = `
+	                <td class="py-2 px-4">${book.title}</td>
+	                <td class="py-2 px-4"><img src="${book.image}" alt="${book.title}" class="w-16 h-16 object-cover"></td>
+	                <td class="py-2 px-4">${book.author}</td>
+	                <td class="py-2 px-4">${book.category}</td>
+	                <td class="py-2 px-4">${book.available ? 'Yes' : 'No'}</td>
+	                <td class="py-2 px-4">${book.id}</td>
+	                <td class="py-2 px-4">${book.acquireBy}</td>
+	                <td class="py-2 px-4">
+	                    <button class="bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-700" onclick="editBook('${book.id}')">Edit</button>
+	                </td>
+	            `;
+
+	            tableBody.appendChild(row);
+	        });
+	    }
+
+	    function sortTable(column) {
+	        const sortDirection = sortOrder[column] === 'asc' ? 'desc' : 'asc';
+	        sortOrder[column] = sortDirection;
+
+	        sortedBooks.sort((a, b) => {
+	            if (a[column] < b[column]) return sortDirection === 'asc' ? -1 : 1;
+	            if (a[column] > b[column]) return sortDirection === 'asc' ? 1 : -1;
+	            return 0;
+	        });
+
+	        renderTable(sortedBooks);
+	    }
+
+	    function filterTable(query) {
+	        const filteredBooks = books.filter(book => {
+	            return (
+	                book.title.toLowerCase().includes(query) ||
+	                book.author.toLowerCase().includes(query) ||
+	                book.category.toLowerCase().includes(query)
+	            );
+	        });
+
+	        renderTable(filteredBooks);
+	    }
+
+	    searchInput.addEventListener('input', function () {
+	        filterTable(this.value.toLowerCase());
+	    });
+
+	    document.querySelectorAll('th[data-sort]').forEach(header => {
+	        header.addEventListener('click', function () {
+	            sortTable(this.getAttribute('data-sort'));
+	        });
+	    });
+
+	    window.editBook = function (id) {
+	        const bookToEdit = books.find(book => book.id === id);
+	        alert(`Editing book: ${bookToEdit.title}`);
+	        // Implement actual editing logic here
+	    };
+
+	    renderTable(books);
+	});
+
+   </script>
+</body>
 </html>
