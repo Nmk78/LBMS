@@ -9,16 +9,24 @@
     <welcome-file>default.jsp</welcome-file>
     <welcome-file>default.htm</welcome-file>
   </welcome-file-list>
-  
-    <servlet>
-      <description></description>
-      <display-name>authServlet</display-name>
-      <servlet-name>authServlet</servlet-name>
-      <servlet-class>auth.authServlet</servlet-class>
+  <servlet>
+    <description></description>
+    <display-name>authServlet</display-name>
+    <servlet-name>authServlet</servlet-name>
+    <servlet-class>auth.authServlet</servlet-class>
   </servlet>
   <servlet-mapping>
     <servlet-name>authServlet</servlet-name>
     <url-pattern>/authServlet</url-pattern>
   </servlet-mapping>
-
+  <servlet>
+    <description></description>
+    <display-name>adish</display-name>
+    <servlet-name>adish</servlet-name>
+    <servlet-class>coder.adish</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>adish</servlet-name>
+    <url-pattern>/adish</url-pattern>
+  </servlet-mapping>
 </web-app>
