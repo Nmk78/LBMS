@@ -1,9 +1,8 @@
 package auth;
 
 import org.mindrot.jbcrypt.BCrypt;
-
-import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,6 +12,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.*;
 
+@WebServlet("/authServlet")
 public class authServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
@@ -39,13 +39,37 @@ public class authServlet extends HttpServlet {
         String signUpQuery = "INSERT INTO member (name, email, password, idOrDept, role, phone) VALUES (?, ?, ?, ?, ?, ?)";
         String signInQuery = "SELECT password FROM member WHERE email = ?";
         String getUserQuery = "SELECT name, email, phone, idOrDept FROM member WHERE email = ?";
-
+        String checkEmailQuery = "SELECT email FROM member WHERE email = ?";
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/lbms", "root", "root");
 
             if ("SignUp".equals(mode)) {
+                // Check if email is already registered
+                PreparedStatement checkEmailStmt = conn.prepareStatement(checkEmailQuery);
+                checkEmailStmt.setString(1, email);
+                ResultSet emailResult = checkEmailStmt.executeQuery();
+                
+                if (emailResult.next()) {
+                    response.sendRedirect("/LBMS/?mode=SignUp&err=email_exists&email="+email+"&name="+name+"&phone="+phone+"&idOrDept="+idOrDept);
+                    return;
+                }
+
+
+                // Validate phone strength (example: at least 8 characters)
+                if (phone.length() != 11 ) {
+                    response.sendRedirect("/LBMS/?mode=SignUp&err=phone_seem_wrong&email="+email+"&name="+name+"&phone="+phone+"&idOrDept="+idOrDept);
+                    return;
+                }
+
+                // Validate password strength (example: at least 8 characters)
+                if (password.length() < 8) {
+                    response.sendRedirect("/LBMS/?mode=SignUp&err=weak_password&email="+email+"&name="+name+"&phone="+phone+"&idOrDept="+idOrDept);
+                    return;
+                }
+
+                // Proceed with sign-up if checks pass
                 PreparedStatement pstmt = conn.prepareStatement(signUpQuery);
                 pstmt.setString(1, name);
                 pstmt.setString(2, email);
@@ -60,58 +84,55 @@ public class authServlet extends HttpServlet {
                     session.setAttribute("email", email);
                     session.setAttribute("phone", phone);
                     session.setAttribute("idOrDept", idOrDept);
-                    out.println("Sign up successful!");
-
-        			response.sendRedirect("user.jsp");
-
+                    response.sendRedirect("user.jsp");
                 } else {
-                    out.println("Failed to sign up.");
+                    response.sendRedirect("/LBMS/?mode=SignUp&err=signup_failed");
                 }
+
                 pstmt.close();
+                checkEmailStmt.close();
             } else if ("SignIn".equals(mode)) {
-                PreparedStatement pstmt = null;
-                ResultSet resultSet = null;
-                PreparedStatement getUser = null;
-                ResultSet userResultSet = null;
+                PreparedStatement pstmt = conn.prepareStatement(signInQuery);
+                pstmt.setString(1, email);
+                ResultSet resultSet = pstmt.executeQuery();
 
-                try {
-                    pstmt = conn.prepareStatement(signInQuery);
-                    pstmt.setString(1, email);
-                    resultSet = pstmt.executeQuery();
-
-                    if (resultSet.next()) {
-                        String storedHashedPassword = resultSet.getString("password");
-                        boolean passwordMatch = BCrypt.checkpw(password, storedHashedPassword);
-
-                        if (passwordMatch) {
-                            getUser = conn.prepareStatement(getUserQuery);
-                            getUser.setString(1, email); // Change 'pstmt' to 'getUser'
-                            userResultSet = getUser.executeQuery();
-
-                            if (userResultSet.next()) {
-                                String n = userResultSet.getString("name");
-                                String mail = userResultSet.getString("email");
-                                String ph = userResultSet.getString("phone");
-                                String idOrDeptFromDB = userResultSet.getString("idOrDept");
-
-                                session.setAttribute("name", n);
-                                session.setAttribute("email", mail);
-                                session.setAttribute("phone", ph);
-                                session.setAttribute("idOrDept", idOrDeptFromDB);
-
-                                 response.sendRedirect("user.jsp");
-                            }
-                        }
+                if (resultSet.next()) {
+                    String storedHashedPassword = resultSet.getString("password");
+                    if(storedHashedPassword == null) {
+                        response.sendRedirect("/LBMS/?mode=SignIn&err=email_does_not_eixt!");
                     }
-                } catch (SQLException e) {
-                    e.printStackTrace(); // Handle exceptions properly
-                } finally {
-                    // Close resources in reverse order of their opening
-                    if (userResultSet != null) try { userResultSet.close(); } catch (SQLException e) { e.printStackTrace(); }
-                    if (getUser != null) try { getUser.close(); } catch (SQLException e) { e.printStackTrace(); }
-                    if (resultSet != null) try { resultSet.close(); } catch (SQLException e) { e.printStackTrace(); }
-                    if (pstmt != null) try { pstmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+                    boolean passwordMatch = BCrypt.checkpw(password, storedHashedPassword);
+
+                    if (passwordMatch) {
+                        PreparedStatement getUser = conn.prepareStatement(getUserQuery);
+                        getUser.setString(1, email);
+                        ResultSet userResultSet = getUser.executeQuery();
+
+                        if (userResultSet.next()) {
+                            String n = userResultSet.getString("name");
+                            String mail = userResultSet.getString("email");
+                            String ph = userResultSet.getString("phone");
+                            String idOrDeptFromDB = userResultSet.getString("idOrDept");
+
+                            session.setAttribute("name", n);
+                            session.setAttribute("email", mail);
+                            session.setAttribute("phone", ph);
+                            session.setAttribute("idOrDept", idOrDeptFromDB);
+
+                            response.sendRedirect("user.jsp");
+                        }
+
+                        userResultSet.close();
+                        getUser.close();
+                    } else {
+                        response.sendRedirect("/LBMS/?mode=SignIn&err=wrong_credentials&email="+email);
+                    }
+                } else {
+                    response.sendRedirect("/LBMS/?mode=SignIn&err=wrong_credentials");
                 }
+
+                resultSet.close();
+                pstmt.close();
             } else {
                 out.println("ERROR: Unspecified Mode.");
             }
@@ -119,20 +140,8 @@ public class authServlet extends HttpServlet {
             conn.close();
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
-            out.println("Error: " + e.getMessage());
+            response.sendRedirect("/LBMS/?mode=" + mode + "&err=internal_error");
         }
-
-        out.println("<html>");
-        out.println("<head><title>User Info</title></head>");
-        out.println("<body bgcolor='white'>");
-        out.println("<center><h2>User Information</h2>");
-        out.println("<ul>");
-        out.println("<li>Name: " + session.getAttribute("name") + "</li>");
-        out.println("<li>Email: " + session.getAttribute("email") + "</li>");
-        out.println("<li>Role: " + session.getAttribute("role") + "</li>");
-        out.println("</ul>");
-        out.println("</center></body>");
-        out.println("</html>");
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

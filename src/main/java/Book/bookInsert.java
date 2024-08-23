@@ -16,6 +16,8 @@ import java.sql.SQLException;
 /**
  * Servlet implementation class bookInsert
  */
+
+@WebServlet("/bookInsert")
 public class bookInsert extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
@@ -33,7 +35,7 @@ public class bookInsert extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         PrintWriter out = response.getWriter();
-        String message ="";
+    String message ="";
         
         String title=request.getParameter("title");
         String category=request.getParameter("category");
@@ -105,7 +107,6 @@ public class bookInsert extends HttpServlet {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 
-
 	}
 
 	/**

@@ -16,6 +16,9 @@ import java.sql.SQLException;
 /**
  * Servlet implementation class bookUpdateDemo
  */
+
+@WebServlet("/bookUpdateDemo")
+
 public class bookUpdateDemo extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        

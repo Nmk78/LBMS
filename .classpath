@@ -22,5 +22,7 @@
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jBCrypt-0.4.1.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jstl-api-1.2.jar"/>
 	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/jstl-impl.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/javax.servlet.jsp.jstl.jar"/>
+	<classpathentry kind="lib" path="src/main/webapp/WEB-INF/lib/gson-2.8.8.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

@@ -1,122 +1,63 @@
-const cardContainer = document.querySelector("#cardContainer");
+const popular = document.querySelector("#popular");
 const peopleChoices = document.querySelector("#peopleChoices");
 const explore = document.querySelector("#explore");
 
-const generateCard = (name, image, author, available, id) => {
-  return `<a href="${id}" target="_self" id="card" class="min-w-[250px] w-[--cardWidth] max-w-96 md:w-[300px] h-[--cardHeigth] bg-[--bg] border-[3px]">
-		<div id="image" class="w-full h-2/3 overflow-hidden bg-cover">
-			<img class="" src="./assets/img/sample4.jpg" alt="Book">
-		</div>
-		<div id="details" class="p-3 space-y-2">
-			<p id="title" class=" font-bold text-[--text] text-2xl">${name}</p>
-			<div id="AuthorAndAvailablity" class="w-full flex justify-between items-center ">
-				<p id="author" class="font-semibold text-lg text-[--text]">${author}</p>
-				${available ? `<p id="status" class="px-3 py-1 border-2 mt-0 border-dashed border-[--accent] text-md text-[--accent]">Availabale</p>` : `<p id="status" class="px-3 py-1 border-2 mt-0 border-dashed border-[--warning] text-md text-[--warning]">Borrowed</p>`}
-			</div>
-			<p id="review" class=" line-clamp-2">Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam recusandae illo sequi provident? Minima explicabo officia cumque animi, velit blanditiis consectetur consequatur molestias cum porro vel exercitationem corporis culpa eius.</p>
+// Function to generate HTML for a book card
+const generateCard = (title, image, author, availability, id) => {
+  return `
+    <a href="/book?id=${id}" target="_self" title="${title}" id="card" class="min-w-[250px] w-[--cardWidth] max-w-96 md:w-[300px] h-[--cardHeight] bg-[--bg] border-[3px]">
+      <div id="image" class="w-full h-[300px] overflow-hidden bg-cover">
+        <img class="w-full h-full object-cover" src="${image}" alt="Book">
+      </div>
+      <div id="details" class="p-3 min-h-[150px] h-[160px] flex flex-col justify-between">
+        <p id="title" class="font-semibold text-[--text] text-xl line-clamp-2">${title}</p>
+        <div id="AuthorAndAvailability" class="w-full flex justify-between items-center">
+          <p id="author" class="font-medium text-lg text-[--text]">${author}</p>
+		<p id="status" class="px-2 py-1 border-2 border-dashed ${availability > 0 ? 'border-[--accent] text-[--accent]' : 'border-[--warning] text-[--warning]'}">
+		  ${availability > 0 
+		    ? `Available : ${availability}` 
+		    : availability 
+		      ? `Due: ${availability} days` 
+		      : `N/A`}
+		</p>
 
-		</div>
-	  </a>`;
+        </div>
+      </div>
+    </a>
+  `;
 };
 
-const books = [
-    {
-      name: 'Book One',
-      image: './assets/img/sample4.jpg',
-      author: 'Author One',
-      available: true,
-      id: '1'
-    },
-    {
-      name: 'Book Two',
-      image: '../assets/img/sample2.jpg',
-      author: 'Author Two',
-      available: false,
-      id: '2'
-    },
-    {
-      name: 'Book Three',
-      image: '../assets/img/sample3.jpg',
-      author: 'Author Three',
-      available: true,
-      id: '3'
-    },
-    {
-      name: 'Book Four',
-      image: '../assets/img/sample4.jpg',
-      author: 'Author Four',
-      available: false,
-      id: '4'
-    },
-    {
-      name: 'Book One',
-      image: './assets/img/sample4.jpg',
-      author: 'Author One',
-      available: true,
-      id: '1'
-    },
-    {
-      name: 'Book Two',
-      image: '../assets/img/sample2.jpg',
-      author: 'Author Two',
-      available: false,
-      id: '2'
-    },
-    {
-      name: 'Book Three',
-      image: '../assets/img/sample3.jpg',
-      author: 'Author Three',
-      available: true,
-      id: '3'
-    },
-    {
-      name: 'Book Four',
-      image: '../assets/img/sample4.jpg',
-      author: 'Author Four',
-      available: false,
-      id: '4'
-    },
-    {
-      name: 'Book One',
-      image: './assets/img/sample4.jpg',
-      author: 'Author One',
-      available: true,
-      id: '1'
-    },
-    {
-      name: 'Book Two',
-      image: '../assets/img/sample2.jpg',
-      author: 'Author Two',
-      available: false,
-      id: '2'
-    },
-    {
-      name: 'Book Three',
-      image: '../assets/img/sample3.jpg',
-      author: 'Author Three',
-      available: true,
-      id: '3'
-    },
-    {
-      name: 'Book Four',
-      image: '../assets/img/sample4.jpg',
-      author: 'Author Four',
-      available: false,
-      id: '4'
-    }
-  ];
+let books;
 
-  books.forEach(book => {
-    const cardHTML = generateCard(book.name, book.image, book.author, book.available, book.id);
-    cardContainer.innerHTML += cardHTML;
-  });
-  
-  books.forEach(book => {
-    const cardHTML = generateCard(book.name, book.image, book.author, book.available, book.id);
-    peopleChoices.innerHTML += cardHTML;
-  });
+// Fetch book data and populate sections
+fetch('/LBMS/getBooks')
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    books = data;
 
-  books.forEach(book => {
-    const cardHTML = generateCard(book.name, book.image, book.author, book.available, book.id);
-    explore.innerHTML += cardHTML;
-  });
+    // Immediately Invoked Function Expression to handle books
+    (function(books) {
+      // Clear existing content
+      popular.innerHTML = '';
+      peopleChoices.innerHTML = '';
+      explore.innerHTML = '';
+
+      // Populate each section
+      books.slice(0, 20).forEach(book => {
+        const cardHTML = generateCard(book.name, book.image, book.author, book.availability, book.id);
+        popular.innerHTML += cardHTML;
+      });
+
+      books.slice(20, 30).forEach(book => {
+        const cardHTML = generateCard(book.name, book.image, book.author, book.availability, book.id);
+        peopleChoices.innerHTML += cardHTML;
+      });
+
+      books.forEach(book => {
+        const cardHTML = generateCard(book.name, book.image, book.author, book.availability, book.id);
+        explore.innerHTML += cardHTML;
+      });
+    })(books);  // Pass the books data to the IIFE
+  })
+  .catch(error => console.error('Error fetching books:', error));

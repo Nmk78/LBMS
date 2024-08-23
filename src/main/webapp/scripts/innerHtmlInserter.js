@@ -9,6 +9,7 @@
 
  */
 
+
 const navContainer = document.getElementById("nav");
 
 let isLoggedIn = localStorage.getItem("isLoggedIn")
@@ -16,6 +17,7 @@ let isLoggedIn = localStorage.getItem("isLoggedIn")
 const url = new URL(window.location);
 path = url.pathname.split("/");
 currentRoute = path[path.length - 1];
+
 
 const navInnerHtml = `      <div id="logo" class="w-1/3">
         <a href="/LBMS/" id="logo" class="w-16 h-16 flex items-center">
@@ -31,23 +33,23 @@ const navInnerHtml = `      <div id="logo" class="w-1/3">
         >
         <a
           href="LBMS/#"
-          class="text-[--secondary] font-semibold text-xl hover:underline underline-offset-2 ${currentRoute == "blog.html" ? "underline": ""}"
+          class="text-[--secondary] font-semibold text-xl hover:underline underline-offset-2 ${currentRoute == "blog" ? "underline": ""}"
           >Blog</a
         >        <a
-          href="LBMS/#"
-          class="text-[--secondary] font-semibold text-xl hover:underline underline-offset-2 ${currentRoute == "blog.html" ? "underline": ""}"
+          href="/LBMS/category"
+          class="text-[--secondary] font-semibold text-xl hover:underline underline-offset-2 ${currentRoute == "category" ? "underline": ""}"
           >Category</a
         >
         <a
-          href="LBMS/#"
-          class="text-[--secondary] font-semibold text-xl hover:underline underline-offset-2 ${currentRoute == "blog.html" ? "underline": ""}"
+          href="/LBMS/about.html"
+          class="text-[--secondary] font-semibold text-xl hover:underline underline-offset-2 ${currentRoute == "about.html" ? "underline": ""}"
           >About</a
         >
       </div>
       <div class="flex items-center justify-end w-1/3 h-2/3 space-x-3 mb-2">
         <form
           class="flex w-[25ch] focus-within:w-auto h-full items-center"
-          action=""
+          action="/LBMS/bookSearch"
         >
           <input
             type="text"
@@ -92,14 +94,14 @@ navContainer.innerHTML = navInnerHtml;
  */
 
 // function(mode){
-//   return innerhtml with modex
+//   return innerhtml with model
 // }
 
 const openModalBtn = document.getElementById("openModalBtn");
 const modal = document.getElementById("modal");
 
-const getModalContent = (mode) => `
-  <div id="" class="fixed inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center">
+const getModalContent = (mode, err = "", email = "", name="", phone="", idOrDept="") => `
+  <div id="" class="fixed z-50 inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center">
     <div class="relative bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
       <button id="authClose" class="absolute top-4 right-5 hover:bg-gray-300 rounded-sm px-4 py-2">
         Close
@@ -108,52 +110,60 @@ const getModalContent = (mode) => `
         mode === "SignUp" ? "Sign Up" : mode === "SignIn" ? "Sign In" : "Error"
       }</h1>
       <form action="authServlet" method="POST" class="space-y-4">
-              ${
-          mode == "SignUp"
+        ${
+          mode === "SignUp"
             ? `
         <div>
           <label for="name" class="block text-sm font-medium text-[--secondary]">Name</label>
-          <input type="text" id="name" name="name" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]">
-        </div>`:""}
+          <input type="text" id="name" name="name" value="${name == null ? "" : name}" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]">
+        </div>` : ""
+        }
         <div>
           <label for="email" class="block text-sm font-medium text-[--secondary]">Email</label>
-          <input type="email" id="email" name="email" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]">
+          <input type="email" id="email" name="email" value="${email == null ? "" : email}" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]">
         </div>
         ${
-          mode == "SignUp"
+          mode === "SignUp"
             ? `
          <div>
           <label for="phone" class="block text-sm font-medium text-[--secondary]">Phone</label>
-          <input type="tel" id="phone" name="phone" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]">
+          <input type="tel" id="phone" name="phone" value="${phone == null ? "" : phone}" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]">
         </div>
-			<div>
-			<label for="userType" class="block text-sm font-medium text-[--secondary]">User Type</label>
-            <div class="flex mt-1">
-                <select
-                  id="userType"
-                  name="userType"
-                  class="mt-1 w-1/3 p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]"
-                >
-                  <option value="KPTMYK">ID</option>
-                  <option value="staff">Staff</option>
-                </select>
-                <input
-                  type="text"
-                  id="idOrDept"
-                  name="idOrDept"
-                  class="mt-1 p-2 w-2/3 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]"
-                  placeholder="Enter ID or Department"
-                />
-            </div></div>
-
-            <input type="hidden" name="mode" value="SignUp">
-          `
+        <div>
+          <label for="userType" class="block text-sm font-medium text-[--secondary]">User Type</label>
+          <div class="flex mt-1">
+              <select
+                id="userType"
+                name="userType"
+                class="mt-1 w-1/3 p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]"
+              >
+                <option value="KPTMYK">ID</option>
+                <option value="staff">Staff</option>
+              </select>
+              <input
+                type="text"
+                id="idOrDept"
+                name="idOrDept"
+                value="${idOrDept == null ? "" : idOrDept}"
+                class="mt-1 p-2 w-2/3 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]"
+                placeholder="Enter ID or Department"
+              />
+          </div>
+        </div>
+        <input type="hidden" name="mode" value="SignUp">
+        `
             : `<input type="hidden" name="mode" value="SignIn">`
         }
         <div>
           <label for="password" class="block text-sm font-medium text-[--secondary]">Password</label>
           <input type="password" id="password" name="password" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]">
         </div>
+        
+        ${
+	        err
+	          ? `<p class="text-red-500 mb-4">${err}</p>`
+	          : ""
+       }
         <button type="submit" class="w-full py-2 px-4 bg-[--secondary] text-white font-semibold rounded-md hover:bg-[--secondary] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[--primary]">${
           mode === "SignUp" ? "Sign Up" : "Sign In"
         }</button>
@@ -161,7 +171,7 @@ const getModalContent = (mode) => `
       <div class="space-y-2 text-xs text-right space-x-1">
 		${
       mode === "SignIn"
-        ? `<span>Doesn't have an account?</span><button id="signUp" class="underline">Sign Up</button>`
+        ? `<span>Don't have an account?</span><button id="signUp" class="underline">Sign Up</button>`
         : `<span>Already have an account?</span><button id="signIn" class="underline">Sign In</button>`
     }
       </div>
@@ -169,46 +179,38 @@ const getModalContent = (mode) => `
   </div>
 `;
 
+// Usage example:
+// const modalContent = getModalContent('SignIn', 'Incorrect password', {email: 'user@example.com'});
+
 const updateURL = (mode) => {
   const url = new URL(window.location);
   url.searchParams.set("mode", mode);
   window.history.pushState({}, "", url);
 };
 
-const authModalToggler = (mode) => {
-  if (modal == null) {
-    alert("Auth modal is not available in this page!");
-  }
-  modal.innerHTML = getModalContent(mode);
-  updateURL(mode);
+function authModalToggler(mode, err, email,name,phone,idOrDept) {
+	console.log(mode, err, email,name,phone,idOrDept)
+    const modalContent = getModalContent(mode, err, email ,name,phone,idOrDept);
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalContent;
+    document.body.appendChild(modalContainer);
 
-  const closeBtn = document.getElementById("authClose");
-  const signUpBtn = document.getElementById("signUp");
-  const signInBtn = document.getElementById("signIn");
+    const authClose = document.getElementById("authClose");
+    if (authClose) {
+        authClose.addEventListener("click", () => {
+            modalContainer.remove();
+        });
+    }
 
-  if (closeBtn) {
-    closeBtn.addEventListener("click", () => {
-      modal.innerHTML = "";
-      const url = new URL(window.location);
-      url.searchParams.delete("mode");
-      window.history.pushState({}, "", url);
-    });
-  }
+    const toggleButton = mode === "SignIn" ? document.getElementById("signUp") : document.getElementById("signIn");
+    if (toggleButton) {
+        toggleButton.addEventListener("click", () => {
+            modalContainer.remove();
+            authModalToggler(mode === "SignIn" ? "SignUp" : "SignIn");
+        });
+    }
+}
 
-  if (signUpBtn) {
-    signUpBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      authModalToggler("SignUp");
-    });
-  }
-
-  if (signInBtn) {
-    signInBtn.addEventListener("click", (e) => {
-      e.preventDefault();
-      authModalToggler("SignIn");
-    });
-  }
-};
 
 if (openModalBtn) {
   openModalBtn.addEventListener("click", () => {
