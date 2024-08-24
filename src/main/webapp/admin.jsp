@@ -38,7 +38,7 @@ pageEncoding="ISO-8859-1"%>
     <!-- Navbar -->
     <div
       id="toast"
-      class="hiidden fixed top-4 right-4 p-4 bg-white border border-green-500 text-white rounded shadow-lg z-50 opacity-0 transition-opacity duration-500"
+      class="hiidden fixed top-4 right-4 p-4 bg-white border border-green-500 text-green rounded shadow-lg z-50 opacity-0 transition-opacity duration-500"
     ></div>
     <nav
       id="nav"
@@ -56,11 +56,11 @@ pageEncoding="ISO-8859-1"%>
             id="drawer-title"
             class="text-2xl text-[--secondary] font-bold mb-4"
           >
-            Add New Post
+            Add New Book
           </h2>
           <button id="drawer-close">Close</button>
         </div>
-        <form action="/LBMS/bookInsert" method="POST">
+	<form action="/LBMS/BookServlet" method="POST" enctype="multipart/form-data">
           <!-- Title -->
           <div class="mb-4">
             <label for="title" class="block text-gray-700">Title</label>
@@ -98,14 +98,12 @@ pageEncoding="ISO-8859-1"%>
           <!-- Copy -->
           <div class="mb-4 flex space-x-3">
             <div class="w-1/2">
-              <label for="addyear" class="block text-gray-700">Add Year</label>
+              <label for="addedDate" class="block text-gray-700">Add Year</label>
               <input
-                type="number"
-                id="addyear"
-                name="addyear"
+                type="date"
+                id="addedDate"
+                name="addedDate"
                 class="w-full p-2 border rounded"
-                min="1000"
-                max="9999"
                 required
               />
             </div>
@@ -119,11 +117,20 @@ pageEncoding="ISO-8859-1"%>
                 value="1"
                 required
               />
+
+
             </div>
           </div>
-
-          <!-- Book Shelf -->
-          <div class="mb-4">
+			<input
+                type="hidden"
+                name="action"
+                value="addBook"
+                required
+              />
+              
+		<div class="w-full flex space-x-3">
+		<!-- Book Shelf -->
+          <div class="mb-4 w-1/2">
             <label for="bookshelf" class="block text-gray-700"
               >Book Shelf</label
             >
@@ -137,7 +144,7 @@ pageEncoding="ISO-8859-1"%>
           </div>
 
           <!-- Acquire By -->
-          <div class="mb-4">
+          <div class="mb-4 w-1/2">
             <label for="acquireby" class="block text-gray-700"
               >Acquire By</label
             >
@@ -151,6 +158,42 @@ pageEncoding="ISO-8859-1"%>
               <option value="Donate">Donate</option>
             </select>
           </div>
+		</div>
+
+		<div class="mb-4">
+		    <div class="flex items-center relative justify-center overflow-hidden rounded-md w-full h-1/2">
+		        <label
+		            for="dropzone-file"
+		            class="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+		        >
+		            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+		                <svg
+		                    class="w-8 h-8 mb-4 text-gray-500"
+		                    aria-hidden="true"
+		                    xmlns="http://www.w3.org/2000/svg"
+		                    fill="none"
+		                    viewBox="0 0 20 16"
+		                >
+		                    <path
+		                        stroke="currentColor"
+		                        stroke-linecap="round"
+		                        stroke-linejoin="round"
+		                        stroke-width="2"
+		                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+		                    />
+		                </svg>
+		                <p class="mb-2 text-sm text-gray-500">
+		                    <span class="font-semibold">Click to upload</span> or drag and drop
+		                </p>
+		                <p class="text-xs text-gray-500">
+		                    SVG, PNG, JPG or GIF (MAX. 800x400px)
+		                </p>
+		                <img id="image-preview" src="" alt="Image preview" class="hidden mt-4 max-w-full h-auto rounded-md" />
+		            </div>
+		            <input id="dropzone-file" type="file" name="image" class="hidden absolute" />
+		        </label>
+		    </div>
+		</div>
 
           <!-- Submit Button -->
           <button
@@ -601,6 +644,32 @@ pageEncoding="ISO-8859-1"%>
     <script src="./scripts/book/bookTableInserter.js"></script>
 
     <script>
+    ////Show selected Image in forms
+    document.getElementById('dropzone-file').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById('image-preview');
+
+        if (file) {
+            // Create a FileReader to read the file
+            const reader = new FileReader();
+
+            // Set up a function to be called when the reader loads the file
+            reader.onload = function(e) {
+                // Set the src of the image to the data URL of the file
+                preview.src = e.target.result;
+                // Show the image element
+                preview.classList.remove('hidden');
+            };
+
+            // Read the file as a Data URL (base64 encoded)
+            reader.readAsDataURL(file);
+        } else {
+            // Hide the image preview if no file is selected
+            preview.classList.add('hidden');
+        }
+    });
+
+    
       // Set Due Data automatically
   function setDueDate() {
     const loanDate = new Date();

@@ -5,7 +5,7 @@ const explore = document.querySelector("#explore");
 // Function to generate HTML for a book card
 const generateCard = (title, image, author, availability, id) => {
   return `
-    <a href="/book?id=${id}" target="_self" title="${title}" id="card" class="min-w-[250px] w-[--cardWidth] max-w-96 md:w-[300px] h-[--cardHeight] bg-[--bg] border-[3px]">
+    <a href="/LBMS/getBook?id=${id}" target="_self" title="${title}" id="card" class="min-w-[250px] w-[--cardWidth] max-w-96 md:w-[300px] h-[--cardHeight] bg-[--bg] border-[3px]">
       <div id="image" class="w-full h-[300px] overflow-hidden bg-cover">
         <img class="w-full h-full object-cover" src="${image}" alt="Book">
       </div>

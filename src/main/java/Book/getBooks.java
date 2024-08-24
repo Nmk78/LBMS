@@ -7,6 +7,8 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Base64;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -19,8 +21,6 @@ import com.google.gson.JsonObject;
 @WebServlet("/getBooks")
 public class getBooks extends HttpServlet {
 
-    private static final long serialVersionUID = 1L;
-
     private static final String DB_URL = "jdbc:mysql://localhost:3306/lbms";
     private static final String USER = "root";
     private static final String PASS = "root";
@@ -29,30 +29,34 @@ public class getBooks extends HttpServlet {
             throws ServletException, IOException {
         response.setContentType("application/json");
         PrintWriter out = response.getWriter();
-
+        
         JsonArray jsonArray = new JsonArray();
-
+        
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-             Statement stmt = conn.createStatement()) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT Bid, Title, Image, AuthorName, CopiesAvailable FROM book")) {
 
-            String sql = "SELECT Bid, Title, Image, AuthorName, CopiesAvailable FROM book";
-            ResultSet rs = stmt.executeQuery(sql);
-
+            ResultSet rs = stmt.executeQuery();
+            
             while (rs.next()) {
                 JsonObject jsonObject = new JsonObject();
                 int bookId = rs.getInt("Bid");
                 jsonObject.addProperty("id", bookId);
                 jsonObject.addProperty("name", rs.getString("Title"));
 
-                // Check if image is null or empty and set default if necessary
-                String image = rs.getString("Image");
-                if (image == null || image.isEmpty()) {
-                    image = "./assets/img/defaultCover.png";
+                // Handle image encoding
+                byte[] imageBytes = rs.getBytes("Image");
+                String image = "";
+                if (imageBytes != null && imageBytes.length > 0) {
+                    image = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
+                } else {
+                    image = "./assets/img/defaultCover.png"; // Default image URL
                 }
                 jsonObject.addProperty("image", image);
-
-                jsonObject.addProperty("author", rs.getString("AuthorName"));
                 
+
+                
+                jsonObject.addProperty("author", rs.getString("AuthorName"));
+
                 int copiesAvailable = rs.getInt("CopiesAvailable");
                 if (copiesAvailable > 0) {
                     jsonObject.addProperty("availability", copiesAvailable);
@@ -62,17 +66,23 @@ public class getBooks extends HttpServlet {
                 }
                 jsonArray.add(jsonObject);
             }
-
+            
             rs.close();
         } catch (Exception e) {
             e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            JsonObject errorResponse = new JsonObject();
+            errorResponse.addProperty("error", "An error occurred while processing the request.");
+            out.print(new Gson().toJson(errorResponse));
+            return;
         }
-
+        
         Gson gson = new Gson();
         String jsonResponse = gson.toJson(jsonArray);
         out.print(jsonResponse);
         out.flush();
     }
+    
 
     private String getNearestReturnDate(Connection conn, int bookId) throws Exception {
         String nearestReturnDate = "N/A";

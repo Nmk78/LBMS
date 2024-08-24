@@ -9,7 +9,7 @@ public class Book {
     private String category;
     private String authorName;
     private Date addedDate;
-    private String bookShelf;
+    private int bookShelf;
     private int copiesAvailable;
     private String acquireBy;
     private Blob image;
@@ -57,12 +57,12 @@ public class Book {
         this.addedDate = addedDate;
     }
 
-    public String getBookShelf() {
+    public int getBookShelf() {
         return bookShelf;
     }
 
-    public void setBookShelf(String bookShelf) {
-        this.bookShelf = bookShelf;
+    public void setBookShelf(int i) {
+        this.bookShelf = i;
     }
 
     public int getCopiesAvailable() {

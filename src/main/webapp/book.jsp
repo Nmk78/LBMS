@@ -1,4 +1,15 @@
+<%@page import="Book.Book"%>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.util.*, java.util.Base64" %> 
+
+<%
+    Book book = (Book) request.getAttribute("book");
+    if (book == null) {
+        out.println("Book details not available.");
+        return;
+    }
+%>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,46 +18,64 @@
     <title>Book Details</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="global.css" />
+    
+
 </head>
-<body class="bg-gray-100 max-w-7xl mx-auto text-gray-800">
+<body class="bg-gray-100 mx-auto text-gray-800">
     <nav id="nav" class="flex sticky top-0 w-full h-18 py-1 justify-between items-center shadow-0 px-20 shadow-slate-300 bg-[--bg]"></nav>
-    <div class="container mx-auto px-4 py-8">
-        <section class="bg-white p-6 shadow-md pb-8 border-b border-[--secondary]">
-            <div class="flex flex-col md:flex-row">
-                <div class="md:w-1/3 mb-4 md:mb-0">
-                    <img id="bookImage" class="w-full h-auto object-cover rounded-lg" src="<%= book.getImage() %>" alt="Book Cover">
+    <div class="container mx-auto px-4 pb-8">
+        <!-- Book Details Section -->
+        <section class="bg-white max-w-7xl h-2/5 mx-auto p-6 shadow-md pb-8 pt-4 border-b border-[--secondary]">
+            <div class="flex flex-col md:flex-row ">
+                <div class="md:w-1/4 md:h-2/3 mb-4 md:mb-0">
+					<!-- //Cover Will come Here  -->
+					    <% if (book.getImage() != null) { %>
+					        <img id="bookImage" class="w-full h-auto object-cover rounded-lg" 
+					            src="<%= "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(book.getImage().getBytes(1L, (int) book.getImage().length())) %>" 
+					            alt="Book Cover">
+					    <% } else { %>
+					        <img id="bookImage" class="w-full h-auto object-cover rounded-lg" 
+					            src="./assets/img/defaultCover.png" 
+					            alt="No Cover Available">
+					    <% } %>
                 </div>
                 <div class="md:w-2/3 md:pl-6">
-                    <header class="mb-8">
-                        <h1 class="text-4xl font-bold mb-2" id="bookTitle"><%= book.getTitle() %></h1>
-                        <p id="bookAuthor" class="text-lg">by <%= book.getAuthorName() %></p>
+                    <header class="mb-8 space-y-4">
+                        <h1 class="text-3xl font-bold mb-2" id="bookTitle"><%= book.getTitle() %></h1>
+                        <p id="bookAuthor" class="font-xl text-lg">Author : <%= book.getAuthorName() %></p>
                     </header>
-                    <p id="bookDescription" class="mb-4 text-gray-700"><%= book.getDescription() %></p>
                     <p id="bookAvailability" class="text-lg font-semibold">Availability: <span id="availabilityStatus"><%= book.getAvailability() %></span></p>
                 </div>
             </div>
         </section>
-        
-        <section class="bg-white p-6 relative">
-            <h2 class="text-3xl font-semibold mb-4">Reviews</h2>
-            <div id="reviewsList" class="mb-4">
-                <% 
-                    List<Review> reviews = book.getReviews(); 
-                    for (Review review : reviews) { 
-                %>
-                    <div class="border-b mb-4 pb-4">
-                        <p class="font-semibold"><%= review.getName() %></p>
-                        <p><%= review.getContent() %></p>
-                    </div>
-                <% 
-                    } 
-                %>
-            </div>
-        </section>
 
-        <section class="bg-white p-6 mb-8 relative">
-            <div class="flex justify-center items-center w-full relative">
-                <form id="reviewForm" class="bg-gray-50 w-1/2 p-6 rounded-lg shadow-md" method="post" action="submitReview.jsp">
+        <!-- Reviews Section -->
+		<section class="bg-white max-w-7xl mx-auto p-6 relative">
+		    <h2 class="text-3xl font-semibold mb-4">Reviews</h2>
+		    <div id="reviewsList" class="mb-4">
+		        <%
+		            List<Map<String, String>> reviews = (List<Map<String, String>>) request.getAttribute("reviews");
+		            if (reviews != null) {
+		                for (Map<String, String> review : reviews) {
+		        %>
+		                    <div class="border-b mb-4 pb-4">
+		                        <p class="font-semibold"><%= review.get("ReviewerName") %></p>
+		                        <p><%= review.get("ReviewContent") %></p>
+		                        <p class="text-sm text-gray-500"><%= review.get("CreatedAt") %></p>
+		                    </div>
+		        <%
+		                }
+		            } else {
+		        %>
+		                <p>No reviews yet.</p>
+		        <%
+		            }
+		        %>
+		    </div>
+		</section>
+		<section class="bg-white max-w-7xl border-t border-[--secondary] mx-auto p-6 mb-8 relative">
+            <div class="flex justify-center items-center w-full relative space-y-4 divider-x">
+                <form id="reviewForm" class=" w-1/2 space-y-4">
                     <h3 class="text-2xl font-semibold mb-4">Submit a Review</h3>
                     <div class="mb-4">
                         <label for="reviewerName" class="block text-lg font-medium mb-2">Your Name</label>
@@ -60,10 +89,10 @@
                 </form>
                 
                 <!-- Rating Form -->
-                <form class="w-1/2 h-full flex justify-center items-center">
-                    <div class="w-2/3 flex flex-col items-center space-y-7">
-                        <label for="rating" class="text-xl font-bold text-center">Rate this book</label>
-                        <div id="star-rating" class="flex items-center mt-2">
+                <form action="rateBook" id="ratingForm" class="w-1/2 space-y-7 h-full flex flex-col justify-center items-center">
+                    <div class="w-2/3 flex flex-col items-center ">
+                        <label for="rating" class="text-xl font-bold text-center mb-7">Rate this book</label>
+                        <div id="star-rating" class="flex items-center">
                             <!-- Radio Buttons and Stars -->
                             <input type="radio" id="star1" name="rating" value="1" class="hidden" />
                             <label for="star1">
@@ -97,10 +126,41 @@
                             </label>
                         </div>
                     </div>
+					<button type="submit" class=" bg-yellow-300 hover:bg-yellow-400 text-white p-2 rounded">Rate this book</button>
                 </form>
             </div>
+			<div id="overlay" class="absolute inset-0 bg-gray-100 bg-opacity-50 hidden flex justify-center text-red-500 font-bold text-4xl items-center" title="You must be logged in to give reviews and ratings.">
+				Login to give reviews and ratings.
+			</div>
+
         </section>
+
     </div>
-    <script src="scripts.js"></script>
+    <script src="./scripts/innerHtmlInserter.js"></script>
+
+	<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        console.log("DOM fully loaded");
+
+        // Check user login status from localStorage
+        const userLogin = localStorage.getItem("userLogin");
+        console.log("User login status:", isLoggedIn);
+        
+        if (!userLogin) {
+            console.log("User not logged in");
+            // Show overlay if user is not logged in
+            document.getElementById("overlay").classList.remove("hidden");
+            //document.getElementById("reviewForm").classList.add("pointer-events-none", "opacity-50");
+            //document.getElementById("ratingForm").classList.add("pointer-events-none", "opacity-50");
+        } else {
+            console.log("User logged in");
+        }
+
+
+    });
+</script>
+	
+
+
 </body>
 </html>
