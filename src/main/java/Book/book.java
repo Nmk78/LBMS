@@ -18,8 +18,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-@WebServlet("/getBook")
-public class getBook extends HttpServlet {
+@WebServlet("/book")
+public class book extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
 

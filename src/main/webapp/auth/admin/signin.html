@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Admin Sign In</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<body>
+    <div class="fixed z-50 inset-0 bg-black bg-opacity-50 flex flex-col justify-center items-center">
+        <div class="relative bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+            <button id="authClose" class="absolute top-4 right-5 hover:bg-gray-300 rounded-sm px-4 py-2">
+                Close
+            </button>
+            <h1 class="text-2xl font-bold mb-6 text-center text-gray-700">Admin Sign In</h1>
+            <form action="/LBMS/adminAuthServlet" method="POST" class="space-y-4">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="email" name="email" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" name="password" class="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" required>
+                </div>
+                <div>
+                    <p class="text-red-500 mb-4" id="errorMessage"></p>
+                </div>
+                <input type="hidden" name="mode" value="SignIn">
+                <button type="submit" class="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Sign In
+                </button>
+            </form>
+            <div class="space-y-2 text-xs text-right space-x-1">
+                <span>Don't have an account?</span>
+                <a href="signup.html" class="underline">Sign Up</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

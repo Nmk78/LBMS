@@ -32,9 +32,9 @@ const navInnerHtml = `      <div id="logo" class="w-1/3">
           >Home</a
         >
         <a
-          href="LBMS/#"
-          class="text-[--secondary] font-semibold text-xl hover:underline underline-offset-2 ${currentRoute == "blog" ? "underline": ""}"
-          >Blog</a
+          href="/LBMS/posts"
+          class="text-[--secondary] font-semibold text-xl hover:underline underline-offset-2 ${currentRoute == "posts" ? "underline": ""}"
+          >Announcement</a
         >        
         <a
           href="/LBMS/category?category=all"

@@ -57,6 +57,9 @@ public class BookServlet extends HttpServlet {
                 case "addOrUpdateRating":
                 	addOrUpdateRating(request, conn, response);
                 	break;
+                case "borrowBook":
+                    borrowBook(request, conn, response);
+                    break;
 //                case "removeRating":
 //                    removeRating(request, conn, response);
 //                    break;
@@ -74,7 +77,7 @@ private void addBook(HttpServletRequest request, Connection conn, HttpServletRes
     String title = request.getParameter("title");
     String author = request.getParameter("author");
     String addedDateStr = request.getParameter("addedDate");
-    String bookShelf = request.getParameter("bookShelf");
+    String bookShelf = request.getParameter("bookshelf");
     String copiesAvailableStr = request.getParameter("copy");
     String acquireBy = request.getParameter("acquireBy");
 
@@ -103,6 +106,7 @@ private void addBook(HttpServletRequest request, Connection conn, HttpServletRes
             return;
         }
     }
+    
 
     Part filePart = request.getPart("image");
     InputStream inputStream = null;
@@ -126,7 +130,8 @@ private void addBook(HttpServletRequest request, Connection conn, HttpServletRes
         }
     }
 
-    String insertBookQuery = "INSERT INTO book (Title, AuthorName, addedDate, BookShelf, copy, CopiesAvailable, AcquireBy, Image, ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    String insertBookQuery = "INSERT INTO book (Title, AuthorName, addedDate, BookShelf, copy, CopiesAvailable, AcquireBy, Image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
     try (PreparedStatement insertBookStmt = conn.prepareStatement(insertBookQuery)) {
         insertBookStmt.setString(1, title);
         insertBookStmt.setString(2, author);
@@ -278,7 +283,7 @@ private void addReview(HttpServletRequest request, Connection conn, HttpServletR
         int rowsAffected = insertReviewStmt.executeUpdate();
         String message = rowsAffected > 0 ? "Review added successfully" : "Failed to add review";
         request.setAttribute("message", message);
-        response.sendRedirect(request.getContextPath() + "/getBook?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
+        response.sendRedirect(request.getContextPath() + "/book?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
     }
 }
 
@@ -433,11 +438,11 @@ private void addOrUpdateRating(HttpServletRequest request, Connection conn, Http
                     if (rowsUpdated > 0) {
                         String message = "Rated This Book";
                         request.setAttribute("message", message);
-                        response.sendRedirect(request.getContextPath() + "/getBook?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
+                        response.sendRedirect(request.getContextPath() + "/book?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
                     } else {
                         String message = "Failed to update this Book";
                         request.setAttribute("message", message);
-                        response.sendRedirect(request.getContextPath() + "/getBook?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
+                        response.sendRedirect(request.getContextPath() + "/book?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
                         }
                 }
             } else {
@@ -451,11 +456,11 @@ private void addOrUpdateRating(HttpServletRequest request, Connection conn, Http
                     if (rowsInserted > 0) {
                         String message = "Rated This Book";
                         request.setAttribute("message", message);
-                        response.sendRedirect(request.getContextPath() + "/getBook?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
+                        response.sendRedirect(request.getContextPath() + "/book?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
                     } else {
                         String message = "Failed to rate";
                         request.setAttribute("message", message);
-                        response.sendRedirect(request.getContextPath() + "/getBook?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
+                        response.sendRedirect(request.getContextPath() + "/book?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
                     }
                 }
             }
@@ -464,6 +469,44 @@ private void addOrUpdateRating(HttpServletRequest request, Connection conn, Http
         e.printStackTrace();
         response.getWriter().write("An error occurred while processing the rating");
     }
+}
+
+private void borrowBook(HttpServletRequest request, Connection conn, HttpServletResponse response) throws ServletException, IOException {
+    // Retrieve form parameters
+	int bookId = Integer.parseInt(request.getParameter("bookid"));
+	String memberId = request.getParameter("memberid"); // Change to String
+	String loanDate = request.getParameter("loanDate");
+	String returnDate = request.getParameter("returnDate");
+	String dueDate = request.getParameter("dueDate");
+
+	// SQL query to insert data into the loan table
+	String sql = "INSERT INTO loan (bookid, memberid, loanDate, returnDate, dueDate) VALUES (?, ?, ?, ?, ?)";
+	try (PreparedStatement statement = conn.prepareStatement(sql)) {
+	    statement.setInt(1, bookId);
+	    statement.setString(2, memberId); // Set as String
+	    statement.setString(3, loanDate);
+	    if (returnDate != null && !returnDate.isEmpty()) {
+	        statement.setString(4, returnDate);
+	    } else {
+	        statement.setNull(4, java.sql.Types.DATE);
+	    }
+	    statement.setString(5, dueDate);
+
+	    int row = statement.executeUpdate();
+	    if (row > 0) {
+	        // Redirect to success page or display success message
+	        String message = "Book borrowed successfully";
+	        request.setAttribute("message", message);
+	        request.getRequestDispatcher("/admin.jsp").forward(request, response);  
+	    } else {
+	        // Redirect to error page or display error message
+	        String message = "Failed to borrow book";
+	        request.setAttribute("message", message);
+	        request.getRequestDispatcher("/admin.jsp").forward(request, response);              
+	    }
+	} catch (Exception ex) {
+	    throw new ServletException("Error: " + ex.getMessage(), ex);
+	}
 }
 
 }

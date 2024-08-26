@@ -24,7 +24,6 @@ public class PostServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
         
-        response.getWriter().append("AA");
         try (Connection conn = DriverManager.getConnection(dbURL, dbUser, dbPass)) {
             switch (action) {
                 case "insert":
@@ -42,6 +41,7 @@ public class PostServlet extends HttpServlet {
                 case "removeReaction":
                     removeReaction(request, conn, response);
                     break;
+
                 default:
                     response.getWriter().write("Invalid action");
                     break;
@@ -67,14 +67,20 @@ public class PostServlet extends HttpServlet {
             statement.setString(1, title);
             statement.setString(2, content);
             if (inputStream != null) {
-                statement.setBlob(3, inputStream);
+            	statement.setBlob(3, inputStream);
+            } else {
+            	statement.setNull(3, java.sql.Types.BLOB);
             }
+
             int row = statement.executeUpdate();
             if (row > 0) {
-                response.getWriter().write("Post created successfully");
-            } else {
-                response.getWriter().write("Failed to create post");
-            }
+	                String message = "Post added successfully";
+	                request.setAttribute("message", message);
+	                request.getRequestDispatcher("/admin.jsp").forward(request, response);
+                } else {
+                    String message = "Failed to add post";
+                    request.setAttribute("message", message);
+                    request.getRequestDispatcher("/admin.jsp").forward(request, response);            }
         } catch (Exception ex) {
             throw new ServletException("Error: " + ex.getMessage(), ex);
         }
@@ -164,4 +170,7 @@ public class PostServlet extends HttpServlet {
             throw new ServletException("Error: " + ex.getMessage(), ex);
         }
     }
+    
+
+
 }

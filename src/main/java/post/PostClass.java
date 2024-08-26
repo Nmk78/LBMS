@@ -3,7 +3,7 @@ package post;
 import java.sql.Blob;
 import java.sql.Timestamp;
 
-public class Post {
+public class PostClass {
     private int postId;
     private String title;
     private String content;

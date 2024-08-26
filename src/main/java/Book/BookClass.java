@@ -3,7 +3,7 @@ package Book;
 import java.sql.Blob;
 import java.util.Date;
 
-public class Book {
+public class BookClass {
     private int bid;
     private String title;
     private String category;
@@ -112,6 +112,8 @@ public class Book {
      * Convert Blob to String (e.g., Base64 encoded image)
      * @return Base64 encoded image string
      */
+    
+    
     public String getImageAsBase64() {
         if (image == null) {
             return null;

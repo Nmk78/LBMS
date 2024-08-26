@@ -18,8 +18,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-@WebServlet("/getBooks")
-public class getBooks extends HttpServlet {
+@WebServlet("/books")
+public class books extends HttpServlet {
 
     private static final String DB_URL = "jdbc:mysql://localhost:3306/lbms";
     private static final String USER = "root";

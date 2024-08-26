@@ -71,7 +71,7 @@
     class="flex sticky top-0 w-full h-18 py-1 justify-between items-center shadow-0 px-20 shadow-slate-300 bg-[--bg]"
 ></nav>
 <!-- Profile Container -->
-<div class="max-w-5xl mx-auto mt-10 p-6 bg-white shadow-md">
+<div class="max-w-6xl mx-auto mt-10 p-6 bg-white shadow-md">
     <!-- Profile Header -->
     <div class="flex h-full items-center border-b border-gray-200 pb-4 space-x-5">
         <img
@@ -111,12 +111,84 @@
         <h2 class="text-xl font-semibold text-[--secondary] mb-4">Saved</h2>
         <section
             id="cardContainer"
-            class="w-full flex flex-wrap justify-between mx-auto h-full mb-5 gap-5"
+            class="w-full flex flex-wrap mx-auto h-full mb-5 gap-5"
         ></section>
     </div>
 </div>
 
+
 <script src="./scripts/innerHtmlInserter.js"></script>
 <script src="./scripts/book/card.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const savedBookIds = JSON.parse(localStorage.getItem('savedBooks')) || [];
+    if (savedBookIds.length > 0) {
+    	console.log("savedBookIds",savedBookIds)
+        fetchSavedBooks(savedBookIds);
+    }
+
+    function fetchSavedBooks(bookIds) {
+        console.log('Sending bookIds:', bookIds); // Debugging line
+
+        const params = new URLSearchParams();
+        bookIds.forEach(id => params.append('bookIds[]', id));
+
+        fetch('/LBMS/getSavedBooks', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: params
+        })
+        .then(response => response.json())
+        .then(data => {
+            displayBooks(data);
+            console.log("Saved data:", data); // Debugging line
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+
+    function displayBooks(books) {
+        const cardContainer = document.getElementById('cardContainer');
+        cardContainer.innerHTML = '';
+
+        books.forEach(function(book) {
+            const bookCard = document.createElement('a');
+            bookCard.href = 'book?id=' + book.bid;  // Using standard string concatenation
+            bookCard.id = book.bid;
+            bookCard.className = 'block w-[300px] bg-white shadow-md p-4 hover:shadow-lg transition-shadow duration-300';
+
+            // Build the inner HTML of the book card using standard string concatenation
+            let cardHTML = '';
+
+            if (book.getImage) {
+                cardHTML += '<img class="w-full object-cover mb-4" src="' +book.getImage + '" alt="' + book.title + '"/>';
+            }
+            
+            
+
+            cardHTML += '<h2 class="text-2xl font-semibold mb-2 line-clamp-3">' + book.title + '</h2>';
+            cardHTML += '<p class="text-gray-700 mb-4 line-clamp-3">' + book.authorName + '</p>';
+            cardHTML += '<p class="text-sm text-gray-500">Rating: ' + book.averageRating.toFixed(1) + '</p>';
+            cardHTML += '<button class="mt-4 bg-red-500 text-white px-4 py-2 hover:bg-red-700" onclick="removeBook(' + book.bid + ')">Remove</button>';
+
+            bookCard.innerHTML = cardHTML;
+
+            cardContainer.appendChild(bookCard);
+        });
+    }
+
+
+
+    window.removeBook = function (bookId) {
+        const savedBooks = JSON.parse(localStorage.getItem('savedBooks')) || [];
+        const updatedBooks = savedBooks.filter(id => id !== bookId);
+        localStorage.setItem('savedBooks', JSON.stringify(updatedBooks));
+        fetchSavedBooks(updatedBooks);
+    }
+});
+
+</script>
 </body>
 </html>

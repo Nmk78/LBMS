@@ -35,6 +35,129 @@
     <title>Book Details</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" type="text/css" href="<%=request.getContextPath()%>/global.css">
+    
+    <style>
+        /* The provided CSS styles */
+        .ui-bookmark {
+            --icon-size: 24px;
+            --icon-secondary-color: rgb(77, 77, 77);
+            --icon-hover-color: rgb(97, 97, 97);
+            --icon-primary-color: gold;
+            --icon-circle-border: 1px solid var(--icon-primary-color);
+            --icon-circle-size: 35px;
+            --icon-anmt-duration: 0.3s;
+        }
+
+        .ui-bookmark input {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            display: none;
+        }
+
+        .ui-bookmark .bookmark {
+            width: var(--icon-size);
+            height: auto;
+            fill: var(--icon-secondary-color);
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transform-origin: top;
+        }
+
+        .bookmark::after {
+            content: "";
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            box-shadow: 0 30px 0 -4px var(--icon-primary-color),
+                30px 0 0 -4px var(--icon-primary-color),
+                0 -30px 0 -4px var(--icon-primary-color),
+                -30px 0 0 -4px var(--icon-primary-color),
+                -22px 22px 0 -4px var(--icon-primary-color),
+                -22px -22px 0 -4px var(--icon-primary-color),
+                22px -22px 0 -4px var(--icon-primary-color),
+                22px 22px 0 -4px var(--icon-primary-color);
+            border-radius: 50%;
+            transform: scale(0);
+        }
+
+        .bookmark::before {
+            content: "";
+            position: absolute;
+            border-radius: 50%;
+            border: var(--icon-circle-border);
+            opacity: 0;
+        }
+
+        .ui-bookmark:hover .bookmark {
+            fill: var(--icon-hover-color);
+        }
+
+        .ui-bookmark input:checked + .bookmark::after {
+            animation: circles var(--icon-anmt-duration)
+                cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation-delay: var(--icon-anmt-duration);
+        }
+
+        .ui-bookmark input:checked + .bookmark {
+            fill: var(--icon-primary-color);
+            animation: bookmark var(--icon-anmt-duration) forwards;
+            transition-delay: 0.3s;
+        }
+
+        .ui-bookmark input:checked + .bookmark::before {
+            animation: circle var(--icon-anmt-duration)
+                cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            animation-delay: var(--icon-anmt-duration);
+        }
+
+        @keyframes bookmark {
+            50% {
+                transform: scaleY(0.6);
+            }
+
+            100% {
+                transform: scaleY(1);
+            }
+        }
+
+        @keyframes circle {
+            from {
+                width: 0;
+                height: 0;
+                opacity: 0;
+            }
+
+            90% {
+                width: var(--icon-circle-size);
+                height: var(--icon-circle-size);
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+            }
+        }
+
+        @keyframes circles {
+            from {
+                transform: scale(0);
+            }
+
+            40% {
+                opacity: 1;
+            }
+
+            to {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+        }
+    </style>
 </head>
 <body class="bg-gray-100 mx-auto text-gray-800">
     <nav
@@ -42,14 +165,14 @@
       class="flex sticky z-50 top-0 w-full h-18 py-1 justify-between items-center shadow-0 px-20 shadow-slate-300 bg-[--bg]"
     ></nav>
     
-    				<div id="successModal" class="fixed z-50 inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center">
+    				<div id="successModal" class="fixed z-50 inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden">
 					    <div class="bg-white shadow-lg p-6 max-w-sm w-full">
 							<div class="w-full flex space-x-3">
 								<div class="inline-flex items-center justify-center flex-shrink-0 w-8 h-8 text-green-500 bg-green-200 ">
 						        <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
 						            <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5Zm3.707 8.207-4 4a1 1 0 0 1-1.414 0l-2-2a1 1 0 0 1 1.414-1.414L9 10.586l3.293-3.293a1 1 0 0 1 1.414 1.414Z"/>
 						        </svg>
-						        <span class="sr-only">Check icon</span>
+						        <span class="sr-only">Mark Icon</span>
 						    </div>
 						        <h2 class="text-xl font-bold mb-4">Reservation Successful</h2>
 							</div>
@@ -88,7 +211,22 @@
                 </div>
                 <div class="w-full mx-auto md:w-2/3 md:pl-6">
                     <header class="mb-8 z-10 space-y-4 w-full relative">
-						<h1 class="absolute z-10 top-2 right-2 cursor-pointer" id="bookTitle" title="save">💙</h1>
+						<div class="saveBtn absolute top-5 right-0">
+						
+						    <label class="ui-bookmark" for="bookmark-checkbox">
+						        <input type="checkbox" id="bookmark-checkbox">
+						        <div class="bookmark">
+						            <svg viewBox="0 0 32 32">
+						                <g>
+						                    <path d="M27 4v27a1 1 0 0 1-1.625.781L16 24.281l-9.375 7.5A1 1 0 0 1 5 31V4a4 4 0 0 1 4-4h14a4 4 0 0 1 4 4z"></path>
+						                </g>
+						            </svg>
+						        </div>
+						    </label>
+
+							  
+							  	
+						</div>
                         <h1 class="text-3xl z-10 font-bold mb-2" id="bookTitle"><%= title %></h1>
                         <p id="bookAuthor" class="font-xl z-10 text-lg"><%= category %></p>
 
@@ -219,7 +357,32 @@
         <script src="./scripts/innerHtmlInserter.js"></script>
 
     <script>
+		// Save and unsave 
+        const checkbox = document.getElementById('bookmark-checkbox');
+        const bookId = <%=bookId%>; 
 
+
+        // Check if the book is already saved in localStorage
+        if (localStorage.getItem('savedBooks')?.includes(bookId)) {
+        	checkbox.checked = true;
+        }
+
+        // Toggle save and unsave in localStorage on click
+        checkbox.addEventListener('change', () => {
+            let savedBooks = JSON.parse(localStorage.getItem('savedBooks')) || [];
+
+            if (checkbox.checked) {
+                if (!savedBooks.includes(bookId)) {
+                    savedBooks.push(bookId);
+                }
+            } else {
+                savedBooks = savedBooks.filter(id => id !== bookId);
+            }
+
+            localStorage.setItem('savedBooks', JSON.stringify(savedBooks));
+        });
+
+    
     
         // Example JavaScript for handling the star rating and review submission
         document.addEventListener('DOMContentLoaded', () => {

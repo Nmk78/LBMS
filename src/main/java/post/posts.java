@@ -16,34 +16,38 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-@WebServlet("/getPost")
-public class getPost extends HttpServlet {
+@WebServlet("/posts")
+public class posts extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<Post> postList = new ArrayList<>();
+        List<PostClass> postList = new ArrayList<>();
 
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/lbms", "root", "root");
 
-            String sql = "SELECT PostId, Title, Content, Image, CreatedAt, UpdatedAt FROM Post";
+//            String sql = "SELECT PostId, Title, Content, Image, CreatedAt, UpdatedAt FROM Post";
+            String sql = "SELECT PostId, Title, Content, Image, CreatedAt, UpdatedAt FROM Post ORDER BY CreatedAt DESC";
+
             try (PreparedStatement statement = conn.prepareStatement(sql)) {
                 ResultSet resultSet = statement.executeQuery();
                 
                 while (resultSet.next()) {
-                    Post post = new Post();
+                    PostClass post = new PostClass();
                     post.setPostId(resultSet.getInt("PostId"));
                     post.setTitle(resultSet.getString("Title"));
                     post.setContent(resultSet.getString("Content"));
 
-//                     Convert BLOB to Base64
+                    // Convert BLOB to Base64
                     Blob blob = resultSet.getBlob("Image");
                     if (blob != null) {
                         ByteArrayOutputStream baos = new ByteArrayOutputStream();
                         baos.write(blob.getBytes(1, (int) blob.length()));
                         String base64Image = Base64.getEncoder().encodeToString(baos.toByteArray());
                         post.setImageBase64(base64Image);
+                    } else {
+                        System.out.println("No image data for post with ID: " + resultSet.getInt("PostId"));
                     }
 
                     post.setCreatedAt(resultSet.getTimestamp("CreatedAt"));
@@ -54,6 +58,13 @@ public class getPost extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             throw new ServletException("Database error: " + e.getMessage());
+        }
+
+        // Debugging: Check if the postList is populated
+        if (postList.isEmpty()) {
+            System.out.println("No posts found.");
+        } else {
+            System.out.println(postList.size() + " posts found.");
         }
 
         request.setAttribute("postList", postList);

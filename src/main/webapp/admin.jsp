@@ -144,7 +144,7 @@ pageEncoding="ISO-8859-1"%>
               class="w-full p-2 border rounded"
               required
             >
-              <option value="Buy">Buy</option>
+              <option value="Buy" >Buy</option>
               <option value="Donate">Donate</option>
             </select>
           </div>
@@ -176,11 +176,11 @@ pageEncoding="ISO-8859-1"%>
 		                    <span class="font-semibold">Click to upload</span> or drag and drop
 		                </p>
 		                <p class="text-xs text-gray-500">
-		                    SVG, PNG, JPG or GIF (MAX. 800x400px)
+		                    PNG, JPG
 		                </p>
 		                <img id="image-preview" src="" alt="Image preview" class="hidden mt-4 max-w-full h-auto rounded-md" />
 		            </div>
-		            <input id="dropzone-file" type="file" name="image" class="hidden absolute" />
+		            <input id="dropzone-file" type="file" accept="image/png, image/jpeg" name="image" class="hidden absolute" />
 		        </label>
 		    </div>
 		</div>
@@ -211,55 +211,7 @@ pageEncoding="ISO-8859-1"%>
           </h2>
           <button id="edit-drawer-close">Close</button>
         </div>
-        <%-- <form action="/LBMS/bookUpdateDemo" method="POST">
-          <!-- Title -->
-          <div class="mb-4">
-            <label for="title" class="block text-gray-700">Book Title</label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              class="w-full p-2 border rounded"
-              required
-            />
-          </div>
 
-          <!-- Book Shelf -->
-          <div class="mb-4">
-            <label for="bookshelf" class="block text-gray-700"
-              >Book Shelf</label
-            >
-            <input
-              type="text"
-              id="bookshelf"
-              name="bookshelf"
-              class="w-full p-2 border rounded"
-              required
-            />
-          </div>
-
-          <!-- Acquire By -->
-          <div class="mb-4">
-            <label for="acquireby" class="block text-gray-700">Duration</label>
-            <select
-              id="acquireby"
-              name="acquireby"
-              class="w-full p-2 border rounded"
-              required
-            >
-              <option value="5">Student</option>
-              <option value="90">Staff</option>
-            </select>
-          </div>
-
-          <!-- Submit Button -->
-          <button
-            type="submit"
-            class="w-full bg-[--secondary] hover:shadow-md text-white p-2 rounded"
-          >
-            Borrow This Book
-          </button>
-        </form> --%>
       </div>
     </div>
 
@@ -308,40 +260,38 @@ pageEncoding="ISO-8859-1"%>
             ></textarea>
           </div>
           <div class="mb-4">
-            <div class="flex items-center justify-center w-full">
-              <label
-                for="dropzone-file"
-                class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
-              >
-                <div
-                  class="flex flex-col items-center justify-center pt-5 pb-6"
-                >
-                  <svg
-                    class="w-8 h-8 mb-4 text-gray-500"
-                    aria-hidden="true"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 20 16"
-                  >
-                    <path
-                      stroke="currentColor"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
-                    />
-                  </svg>
-                  <p class="mb-2 text-sm text-gray-500">
-                    <span class="font-semibold">Click to upload</span> or drag
-                    and drop
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    SVG, PNG, JPG or GIF (MAX. 800x400px)
-                  </p>
-                </div>
-                <input id="dropzone-file" type="file" name="image" class="hidden" />
-              </label>
-            </div>
+		    <div class="flex items-center relative justify-center overflow-hidden rounded-md w-full h-1/2">
+		        <label
+		            for="dropzone-file1"
+		            class="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+		        >
+		            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+		                <svg
+		                    class="w-8 h-8 mb-4 text-gray-500"
+		                    aria-hidden="true"
+		                    xmlns="http://www.w3.org/2000/svg"
+		                    fill="none"
+		                    viewBox="0 0 20 16"
+		                >
+		                    <path
+		                        stroke="currentColor"
+		                        stroke-linecap="round"
+		                        stroke-linejoin="round"
+		                        stroke-width="2"
+		                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+		                    />
+		                </svg>
+		                <p class="mb-2 text-sm text-gray-500">
+		                    <span class="font-semibold">Click to upload</span> or drag and drop
+		                </p>
+		                <p class="text-xs text-gray-500">
+		                    PNG, JPG
+		                </p>
+		                <img id="image-preview1" src="" alt="Image preview" class="hidden mt-4 max-w-full h-auto rounded-md" />
+		            </div>
+		            <input id="dropzone-file1" type="file" accept="image/png, image/jpeg" name="image" class="hidden absolute" />
+		        </label>
+		    </div>
           </div>
 
           <!-- Submit Button -->
@@ -362,7 +312,7 @@ pageEncoding="ISO-8859-1"%>
       <div class="bg-white rounded-lg shadow-lg p-8 w-1/3">
         <h2 class="text-2xl font-bold mb-6">Borrow book</h2>
 
-      <form id="loanForm" class="space-y-4">
+      <form id="loanForm" method="POST" action="/LBMS/BookServlet" class="space-y-4">
         <div>
           <label class="block text-sm font-medium">Book ID</label>
           <input
@@ -370,14 +320,20 @@ pageEncoding="ISO-8859-1"%>
             id="bookid"
             class="mt-1 p-2 w-full border border-gray-400"
             required
+            name="bookid"
           />
         </div>
+                    <input
+            type="hidden"
+              name="action"
+              value="borrowBook"
+            />
         <div>
           <label class="text-sm font-medium">Member ID</label>
-          <label class="text-sm font-light">or Name</label>
           <input
             type="text"
             id="memberid"
+            name="memberid"
             class="mt-1 p-2 w-full border border-gray-400"
             required
           />
@@ -388,6 +344,7 @@ pageEncoding="ISO-8859-1"%>
             <input
               type="date"
               id="loanDate"
+              name="loanDate"
               class="mt-1 p-2 w-full border border-gray-400"
               required
               onchange="setDueDate()"
@@ -398,6 +355,7 @@ pageEncoding="ISO-8859-1"%>
             <input
               type="date"
               id="dueDate"
+			  name="dueDate"
               class="mt-1 p-2 w-full border border-gray-400"
               required
               readonly
@@ -416,15 +374,15 @@ pageEncoding="ISO-8859-1"%>
           <button
             type="button"
             onclick="toggleModal()"
-            class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-700"
+            class="bg-gray-500 text-white px-4 py-2 hover:bg-gray-700"
           >
             Cancel
           </button>
           <button
             type="submit"
-            class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            class="bg-blue-500 text-white px-4 py-2 hover:bg-blue-700"
           >
-            Insert
+            Borrow
           </button>
         </div>
       </form>
@@ -658,6 +616,31 @@ pageEncoding="ISO-8859-1"%>
             preview.classList.add('hidden');
         }
     });
+    
+    document.getElementById('dropzone-file1').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById('image-preview1');
+
+        if (file) {
+            // Create a FileReader to read the file
+            const reader = new FileReader();
+
+            // Set up a function to be called when the reader loads the file
+            reader.onload = function(e) {
+                // Set the src of the image to the data URL of the file
+                preview.src = e.target.result;
+                // Show the image element
+                preview.classList.remove('hidden');
+            };
+
+            // Read the file as a Data URL (base64 encoded)
+            reader.readAsDataURL(file);
+        } else {
+            // Hide the image preview if no file is selected
+            preview.classList.add('hidden');
+        }
+    });
+
 
     
       // Set Due Data automatically
@@ -752,8 +735,8 @@ pageEncoding="ISO-8859-1"%>
 
         // Hide after 5 seconds
         setTimeout(() => {
+            toast.classList.remove("opacity-100");
           toast.classList.add("opacity-0");
-          toast.classList.remove("opacity-100");
 
           // Remove the element after the transition (0.5s) is done
           setTimeout(() => {
@@ -779,32 +762,7 @@ pageEncoding="ISO-8859-1"%>
       }
 
 
-      // Function to handle loan form submission
-      document
-        .getElementById("loanForm")
-        .addEventListener("submit", function (event) {
-          event.preventDefault();
 
-          const bookid = document.getElementById("bookid").value;
-          const memberid = document.getElementById("memberid").value;
-          const loanDate = document.getElementById("loanDate").value;
-          const returnDate = document.getElementById("returnDate").value;
-          const dueDate = document.getElementById("dueDate").value;
-          const status = document.getElementById("status").value;
-
-          console.log("Loan Data:", {
-            bookid,
-            memberid,
-            loanDate,
-            returnDate,
-            dueDate,
-            status,
-          });
-
-          // Here, add your code to insert the loan data into the database
-
-          closeModal(); // Close the modal after submission
-        });
     </script>
   </body>
 </html>
