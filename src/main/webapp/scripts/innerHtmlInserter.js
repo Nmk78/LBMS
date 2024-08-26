@@ -35,8 +35,9 @@ const navInnerHtml = `      <div id="logo" class="w-1/3">
           href="LBMS/#"
           class="text-[--secondary] font-semibold text-xl hover:underline underline-offset-2 ${currentRoute == "blog" ? "underline": ""}"
           >Blog</a
-        >        <a
-          href="/LBMS/category"
+        >        
+        <a
+          href="/LBMS/category?category=all"
           class="text-[--secondary] font-semibold text-xl hover:underline underline-offset-2 ${currentRoute == "category" ? "underline": ""}"
           >Category</a
         >
@@ -146,7 +147,7 @@ const getModalContent = (mode, err = "", email = "", name="", phone="", idOrDept
                 name="idOrDept"
                 value="${idOrDept == null ? "" : idOrDept}"
                 class="mt-1 p-2 w-2/3 border border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-[--primary] focus:border-[--primary]"
-                placeholder="Enter ID or Department"
+                placeholder="Enter ID"
               />
           </div>
         </div>
@@ -188,9 +189,8 @@ const updateURL = (mode) => {
   window.history.pushState({}, "", url);
 };
 
-function authModalToggler(mode, err, email,name,phone,idOrDept) {
-	console.log(mode, err, email,name,phone,idOrDept)
-    const modalContent = getModalContent(mode, err, email ,name,phone,idOrDept);
+function authModalToggler(mode, err, email, name, phone, idOrDept) {
+    const modalContent = getModalContent(mode, err, email, name, phone, idOrDept);
     const modalContainer = document.createElement('div');
     modalContainer.innerHTML = modalContent;
     document.body.appendChild(modalContainer);
@@ -209,7 +209,36 @@ function authModalToggler(mode, err, email,name,phone,idOrDept) {
             authModalToggler(mode === "SignIn" ? "SignUp" : "SignIn");
         });
     }
+
+    // Handle disabling input box based on userType selection
+  const userTypeSelect = document.getElementById("userType");
+  const idOrDeptInput = document.getElementById("idOrDept");
+
+  if (userTypeSelect && idOrDeptInput) {
+    userTypeSelect.addEventListener("change", function() {
+      if (userTypeSelect.value === "staff") {
+        //idOrDeptInput.classList.add("hidden"); // Hide the input box
+        idOrDeptInput.placeholder = "ID will be generated automatically.";
+		idOrDeptInput.disabled = true;
+      } else {
+        idOrDeptInput.classList.remove("hidden"); // Show the input box
+        idOrDeptInput.placeholder = "Enter ID";
+      }
+    });
+
+    // Set the initial state based on the current selection
+    if (userTypeSelect.value === "staff") {
+      //idOrDeptInput.classList.add("hidden"); // Hide the input box
+      idOrDeptInput.placeholder = "ID will be generated automatically.";
+	  idOrDeptInput.disabled = true;
+    } else {
+      idOrDeptInput.classList.remove("hidden"); // Show the input box
+      idOrDeptInput.placeholder = "Enter ID";
+    }
+  }
+
 }
+
 
 
 if (openModalBtn) {
@@ -220,6 +249,8 @@ if (openModalBtn) {
 }
 
 
+
+////Footer
 
 const footerInnerHtml = `        <div id="top" class="flex">
           <div id="left" class="w-1/3 flex justify-center items-center">

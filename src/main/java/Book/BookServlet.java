@@ -10,6 +10,7 @@ import jakarta.servlet.http.Part;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.DriverManager;
@@ -50,12 +51,15 @@ public class BookServlet extends HttpServlet {
                 case "deleteReview":
                     deleteReview(request, conn, response);
                     break;
-                case "addRating":
-                    addRating(request, conn, response);
+                case "pinReview":
+                	togglePinReview(request, conn, response);
                     break;
-                case "removeRating":
-                    removeRating(request, conn, response);
-                    break;
+                case "addOrUpdateRating":
+                	addOrUpdateRating(request, conn, response);
+                	break;
+//                case "removeRating":
+//                    removeRating(request, conn, response);
+//                    break;
                 default:
                     response.getWriter().write("Invalid action");
                     break;
@@ -68,14 +72,12 @@ public class BookServlet extends HttpServlet {
 
 private void addBook(HttpServletRequest request, Connection conn, HttpServletResponse response) throws ServletException, IOException, SQLException {
     String title = request.getParameter("title");
-    String category = request.getParameter("category");
     String author = request.getParameter("author");
     String addedDateStr = request.getParameter("addedDate");
     String bookShelf = request.getParameter("bookShelf");
-    String copiesAvailableStr = request.getParameter("copiesAvailable");
+    String copiesAvailableStr = request.getParameter("copy");
     String acquireBy = request.getParameter("acquireBy");
 
-    int copiesAvailable = 0;
 
     Date addedDate = null;
 
@@ -91,6 +93,7 @@ private void addBook(HttpServletRequest request, Connection conn, HttpServletRes
         }
     }
 
+    int copiesAvailable = 0;
 
     if (copiesAvailableStr != null && !copiesAvailableStr.isEmpty()) {
         try {
@@ -123,13 +126,13 @@ private void addBook(HttpServletRequest request, Connection conn, HttpServletRes
         }
     }
 
-    String insertBookQuery = "INSERT INTO book (Title, Category, AuthorName, addedDate, BookShelf, CopiesAvailable, AcquireBy, Image) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    String insertBookQuery = "INSERT INTO book (Title, AuthorName, addedDate, BookShelf, copy, CopiesAvailable, AcquireBy, Image, ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     try (PreparedStatement insertBookStmt = conn.prepareStatement(insertBookQuery)) {
         insertBookStmt.setString(1, title);
-        insertBookStmt.setString(2, category);
-        insertBookStmt.setString(3, author);
-        insertBookStmt.setDate(4, addedDate);
-        insertBookStmt.setString(5, bookShelf);
+        insertBookStmt.setString(2, author);
+        insertBookStmt.setDate(3, addedDate);
+        insertBookStmt.setString(4, bookShelf);
+        insertBookStmt.setInt(5, copiesAvailable);
         insertBookStmt.setInt(6, copiesAvailable);
         insertBookStmt.setString(7, acquireBy);
 
@@ -162,11 +165,10 @@ private void editBook(HttpServletRequest request, Connection conn, HttpServletRe
     }
 
     String title = request.getParameter("title");
-    String category = request.getParameter("category");
     String author = request.getParameter("author");
     String addedDateStr = request.getParameter("addedDate");
     String bookShelf = request.getParameter("bookShelf");
-    String copiesAvailableStr = request.getParameter("copiesAvailable");
+    String copiesAvailableStr = request.getParameter("copy");
     String acquireBy = request.getParameter("acquireBy");
 
     int addedDate = 0;
@@ -212,20 +214,19 @@ private void editBook(HttpServletRequest request, Connection conn, HttpServletRe
         }
     }
 
-    String updateBookQuery = "UPDATE book SET Title = ?, Category = ?, AuthorName = ?, addedDate = ?, BookShelf = ?, CopiesAvailable = ?, AcquireBy = ?, Image = ? WHERE BookId = ?";
+    String updateBookQuery = "UPDATE book SET Title = ?,  AuthorName = ?, addedDate = ?, BookShelf = ?, CopiesAvailable = ?, AcquireBy = ?, Image = ? WHERE BookId = ?";
     try (PreparedStatement updateBookStmt = conn.prepareStatement(updateBookQuery)) {
         updateBookStmt.setString(1, title);
-        updateBookStmt.setString(2, category);
-        updateBookStmt.setString(3, author);
-        updateBookStmt.setInt(4, addedDate);
-        updateBookStmt.setString(5, bookShelf);
-        updateBookStmt.setInt(6, copiesAvailable);
-        updateBookStmt.setString(7, acquireBy);
+        updateBookStmt.setString(2, author);
+        updateBookStmt.setInt(3, addedDate);
+        updateBookStmt.setString(4, bookShelf);
+        updateBookStmt.setInt(5, copiesAvailable);
+        updateBookStmt.setString(6, acquireBy);
 
         if (inputStream != null) {
-            updateBookStmt.setBlob(8, inputStream);
+            updateBookStmt.setBlob(7, inputStream);
         } else {
-            updateBookStmt.setNull(8, java.sql.Types.BLOB);
+            updateBookStmt.setNull(7, java.sql.Types.BLOB);
         }
 
         updateBookStmt.setInt(9, bookId);
@@ -265,21 +266,72 @@ private void addReview(HttpServletRequest request, Connection conn, HttpServletR
         return;
     }
 
-    String reviewerName = request.getParameter("reviewerName");
+    String MemberId = request.getParameter("MemberId");
     String reviewContent = request.getParameter("reviewContent");
 
-    String insertReviewQuery = "INSERT INTO review (BookId, ReviewerName, ReviewContent, CreatedAt) VALUES (?, ?, ?, NOW())";
+    String insertReviewQuery = "INSERT INTO review (BookId, MemberId, ReviewContent, CreatedAt) VALUES (?, ?, ?, NOW())";
     try (PreparedStatement insertReviewStmt = conn.prepareStatement(insertReviewQuery)) {
         insertReviewStmt.setInt(1, bookId);
-        insertReviewStmt.setString(2, reviewerName);
+        insertReviewStmt.setString(2, MemberId);
         insertReviewStmt.setString(3, reviewContent);
 
         int rowsAffected = insertReviewStmt.executeUpdate();
         String message = rowsAffected > 0 ? "Review added successfully" : "Failed to add review";
         request.setAttribute("message", message);
-        request.getRequestDispatcher("/bookDetails.jsp?bookId=" + bookId).forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/getBook?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
     }
 }
+
+private void togglePinReview(HttpServletRequest request, Connection conn, HttpServletResponse response) 
+        throws ServletException, IOException, SQLException {
+    String reviewIdStr = request.getParameter("reviewId");
+
+    int reviewId = 0;
+
+    if (reviewIdStr != null && !reviewIdStr.isEmpty()) {
+        try {
+            reviewId = Integer.parseInt(reviewIdStr);
+        } catch (NumberFormatException e) {
+            response.getWriter().write("Invalid review ID format");
+            return;
+        }
+    } else {
+        response.getWriter().write("Review ID is required");
+        return;
+    }
+
+    // Check the current pin status
+    String checkPinStatusQuery = "SELECT IsPinned FROM review WHERE ReviewId = ?";
+    try (PreparedStatement checkStmt = conn.prepareStatement(checkPinStatusQuery)) {
+        checkStmt.setInt(1, reviewId);
+        try (ResultSet rs = checkStmt.executeQuery()) {
+            if (rs.next()) {
+                boolean isPinned = rs.getBoolean("IsPinned");
+                
+                // Toggle the pin status
+                String togglePinQuery = "UPDATE review SET IsPinned = ? WHERE ReviewId = ?";
+                try (PreparedStatement toggleStmt = conn.prepareStatement(togglePinQuery)) {
+                    toggleStmt.setBoolean(1, !isPinned);
+                    toggleStmt.setInt(2, reviewId);
+                    int rowsUpdated = toggleStmt.executeUpdate();
+                    if (rowsUpdated > 0) {
+                        String message = isPinned ? "Review unpinned successfully" : "Review pinned successfully";
+                        response.getWriter().write(message);
+                    } else {
+                        response.getWriter().write("Failed to toggle pin status");
+                    }
+                }
+            } else {
+                response.getWriter().write("Review not found");
+            }
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+        response.getWriter().write("An error occurred while toggling the pin status");
+    }
+}
+
+
 
 private void deleteReview(HttpServletRequest request, Connection conn, HttpServletResponse response) throws ServletException, IOException, SQLException {
     String reviewIdStr = request.getParameter("reviewId");
@@ -316,13 +368,21 @@ private void deleteReview(HttpServletRequest request, Connection conn, HttpServl
         int rowsAffected = deleteReviewStmt.executeUpdate();
         String message = rowsAffected > 0 ? "Review deleted successfully" : "Failed to delete review";
         request.setAttribute("message", message);
-        request.getRequestDispatcher("/bookDetails.jsp?bookId=" + bookId).forward(request, response);
+        request.getRequestDispatcher("/book.jsp?id=" + bookId).forward(request, response);
     }
 }
 
-private void addRating(HttpServletRequest request, Connection conn, HttpServletResponse response) throws ServletException, IOException, SQLException {
+
+private void addOrUpdateRating(HttpServletRequest request, Connection conn, HttpServletResponse response) 
+        throws ServletException, IOException, SQLException {
     String bookIdStr = request.getParameter("bookId");
+    String memberIdStr = request.getParameter("memberId"); // memberId is a String, no parsing to int needed
+    String ratingStr = request.getParameter("rating");
+    
     int bookId = 0;
+    int rating = 0;
+
+    // Validate and parse input parameters
     if (bookIdStr != null && !bookIdStr.isEmpty()) {
         try {
             bookId = Integer.parseInt(bookIdStr);
@@ -335,13 +395,18 @@ private void addRating(HttpServletRequest request, Connection conn, HttpServletR
         return;
     }
 
-    String reviewerName = request.getParameter("reviewerName");
-    String ratingStr = request.getParameter("rating");
-    int rating = 0;
+    if (memberIdStr == null || memberIdStr.isEmpty()) {
+        response.getWriter().write("Member ID is required");
+        return;
+    }
 
     if (ratingStr != null && !ratingStr.isEmpty()) {
         try {
             rating = Integer.parseInt(ratingStr);
+            if (rating < 1 || rating > 5) { // Assuming ratings are between 1 and 5
+                response.getWriter().write("Rating must be between 1 and 5");
+                return;
+            }
         } catch (NumberFormatException e) {
             response.getWriter().write("Invalid rating format");
             return;
@@ -351,46 +416,57 @@ private void addRating(HttpServletRequest request, Connection conn, HttpServletR
         return;
     }
 
-    String insertRatingQuery = "INSERT INTO rating (BookId, ReviewerName, Rating) VALUES (?, ?, ?)";
-    try (PreparedStatement insertRatingStmt = conn.prepareStatement(insertRatingQuery)) {
-        insertRatingStmt.setInt(1, bookId);
-        insertRatingStmt.setString(2, reviewerName);
-        insertRatingStmt.setInt(3, rating);
-
-        int rowsAffected = insertRatingStmt.executeUpdate();
-        String message = rowsAffected > 0 ? "Rating added successfully" : "Failed to add rating";
-        request.setAttribute("message", message);
-        request.getRequestDispatcher("/bookDetails.jsp?bookId=" + bookId).forward(request, response);
-    }
-}
-
-private void removeRating(HttpServletRequest request, Connection conn, HttpServletResponse response) throws ServletException, IOException, SQLException {
-    String bookIdStr = request.getParameter("bookId");
-    int bookId = 0;
-    if (bookIdStr != null && !bookIdStr.isEmpty()) {
-        try {
-            bookId = Integer.parseInt(bookIdStr);
-        } catch (NumberFormatException e) {
-            response.getWriter().write("Invalid book ID format");
-            return;
+    // Check if the rating already exists
+    String checkRatingQuery = "SELECT RatingValue FROM rating WHERE BookId = ? AND MemberId = ?";
+    try (PreparedStatement checkStmt = conn.prepareStatement(checkRatingQuery)) {
+        checkStmt.setInt(1, bookId);
+        checkStmt.setString(2, memberIdStr);
+        try (ResultSet rs = checkStmt.executeQuery()) {
+            if (rs.next()) {
+                // Rating exists, so update it
+                String updateRatingQuery = "UPDATE rating SET RatingValue = ? WHERE BookId = ? AND MemberId = ?";
+                try (PreparedStatement updateStmt = conn.prepareStatement(updateRatingQuery)) {
+                    updateStmt.setInt(1, rating);
+                    updateStmt.setInt(2, bookId);
+                    updateStmt.setString(3, memberIdStr);
+                    int rowsUpdated = updateStmt.executeUpdate();
+                    if (rowsUpdated > 0) {
+                        String message = "Rated This Book";
+                        request.setAttribute("message", message);
+                        response.sendRedirect(request.getContextPath() + "/getBook?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
+                    } else {
+                        String message = "Failed to update this Book";
+                        request.setAttribute("message", message);
+                        response.sendRedirect(request.getContextPath() + "/getBook?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
+                        }
+                }
+            } else {
+                // Rating does not exist, so insert a new one
+                String insertRatingQuery = "INSERT INTO rating (BookId, MemberId, RatingValue, CreatedAt) VALUES (?, ?, ?, NOW())";
+                try (PreparedStatement insertStmt = conn.prepareStatement(insertRatingQuery)) {
+                    insertStmt.setInt(1, bookId);
+                    insertStmt.setString(2, memberIdStr);
+                    insertStmt.setInt(3, rating);
+                    int rowsInserted = insertStmt.executeUpdate();
+                    if (rowsInserted > 0) {
+                        String message = "Rated This Book";
+                        request.setAttribute("message", message);
+                        response.sendRedirect(request.getContextPath() + "/getBook?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
+                    } else {
+                        String message = "Failed to rate";
+                        request.setAttribute("message", message);
+                        response.sendRedirect(request.getContextPath() + "/getBook?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
+                    }
+                }
+            }
         }
-    } else {
-        response.getWriter().write("Book ID is required");
-        return;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        response.getWriter().write("An error occurred while processing the rating");
     }
-
-    String reviewerName = request.getParameter("reviewerName");
-
-    String deleteRatingQuery = "DELETE FROM rating WHERE BookId = ? AND ReviewerName = ?";
-    try (PreparedStatement deleteRatingStmt = conn.prepareStatement(deleteRatingQuery)) {
-        deleteRatingStmt.setInt(1, bookId);
-        deleteRatingStmt.setString(2, reviewerName);
-        int rowsAffected = deleteRatingStmt.executeUpdate();
-        String message = rowsAffected > 0 ? "Rating removed successfully" : "Failed to remove rating";
-        request.setAttribute("message", message);
-        request.getRequestDispatcher("/bookDetails.jsp?bookId=" + bookId).forward(request, response);
-    }
+}
 
 }
-}
+
+
 

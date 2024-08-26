@@ -46,6 +46,10 @@ public class authServlet extends HttpServlet {
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/lbms", "root", "root");
 
             if ("SignUp".equals(mode)) {
+            	if("staff".equals(role)) {
+            		///Generate ID
+            		idOrDept = generateUniqueID();
+            	}
                 // Check if email is already registered
                 PreparedStatement checkEmailStmt = conn.prepareStatement(checkEmailQuery);
                 checkEmailStmt.setString(1, email);
@@ -143,6 +147,13 @@ public class authServlet extends HttpServlet {
             response.sendRedirect("/LBMS/?mode=" + mode + "&err=internal_error");
         }
     }
+    
+    private String generateUniqueID() {
+        // Generate a random number between 100000 and 999999
+        int randomNum = 100000 + (int)(Math.random() * 900000);
+        return String.format("%06d", randomNum); // Ensure the ID is always 6 digits
+    }
+
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         doGet(request, response);

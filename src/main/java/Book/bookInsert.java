@@ -17,7 +17,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.UUID;
-import org.apache.commons.io.IOUtils;
+
+import org.apache.tomcat.jakartaee.commons.compress.utils.IOUtils;
 
 /**
  * Servlet implementation class bookInsert

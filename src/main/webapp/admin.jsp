@@ -73,16 +73,6 @@ pageEncoding="ISO-8859-1"%>
             />
           </div>
 
-       <!--   Category -->
-          <div class="mb-4">
-            <label for="category" class="block text-gray-700">Category</label>
-            <input
-              type="text"
-              id="category"
-              name="category"
-              class="w-full p-2 border rounded"
-            />
-          </div>
           <!-- Author Name -->
           <div class="mb-4">
             <label for="author" class="block text-gray-700">Author Name</label>

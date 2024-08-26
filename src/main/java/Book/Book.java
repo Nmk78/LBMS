@@ -14,6 +14,7 @@ public class Book {
     private String acquireBy;
     private Blob image;
     private String availability;
+    private double averageRating; // New field for average rating
 
     // Getters and setters for each field
 
@@ -61,8 +62,8 @@ public class Book {
         return bookShelf;
     }
 
-    public void setBookShelf(int i) {
-        this.bookShelf = i;
+    public void setBookShelf(int bookShelf) {
+        this.bookShelf = bookShelf;
     }
 
     public int getCopiesAvailable() {
@@ -96,7 +97,15 @@ public class Book {
     public void setAvailability(String availability) {
         this.availability = availability;
     }
-    
+
+    public double getAverageRating() {
+        return averageRating;
+    }
+
+    public void setAverageRating(double averageRating) {
+        this.averageRating = averageRating;
+    }
+
     // Additional methods (if necessary)
     
     /**
