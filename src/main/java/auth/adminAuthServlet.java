@@ -14,6 +14,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 @WebServlet("/adminAuthServlet")
 public class adminAuthServlet extends HttpServlet {
@@ -38,132 +39,146 @@ public class adminAuthServlet extends HttpServlet {
         String password = request.getParameter("password");
 
         String checkEmailSQL = "SELECT email FROM admin WHERE email = ?";
-        String insertSQL = "INSERT INTO admin (adminName, email, phone, password, referralCode) VALUES (?, ?, ?, ?)";
+        String insertSQL = "INSERT INTO admin (adminName, email, phone, password, referralCode) VALUES (?, ?, ?, ?, ?)";
 
-        
+        HttpSession session = request.getSession();
+        session.setMaxInactiveInterval(60 * 60 * 24 * 30); // Max 30-day session age
+
         try {
-        	
             Class.forName("com.mysql.cj.jdbc.Driver");
             Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/lbms", "root", "root");
             PreparedStatement checkStatement = conn.prepareStatement(checkEmailSQL);
-            
-            
+
             checkStatement.setString(1, email);
             ResultSet emailResult = checkStatement.executeQuery();
             if (emailResult.next()) {
-                response.sendRedirect("/LBMS/auth/admin/signup.html?mode=SignUp&err=email_exists&email="+email+"&name="+adminName+"&phone="+phone+"&email="+email);
+                response.sendRedirect("/LBMS/auth/admin/signup.html?mode=SignUp&err=email_exists&email=" + email + "&name=" + adminName + "&phone=" + phone);
                 return;
             }
 
-
-            // Validate phone strength (example: at least 8 characters)
-            if (phone.length() != 11 ) {
-                response.sendRedirect("/LBMS/auth/admin/signup.html?mode=SignUp&err=phone_seem_wrong&email="+email+"&name="+adminName+"&phone="+phone+"&email="+email);
+            // Validate phone number length (e.g., must be 11 characters)
+            if (phone.length() != 11) {
+                response.sendRedirect("/LBMS/auth/admin/signup.html?mode=SignUp&err=phone_seem_wrong&email=" + email + "&name=" + adminName + "&phone=" + phone);
                 return;
             }
 
-            // Validate password strength (example: at least 8 characters)
+            // Validate password strength (e.g., must be at least 8 characters)
             if (password.length() < 8) {
-                response.sendRedirect("/LBMS/auth/admin/signup.html?mode=SignUp&err=weak_password&email="+email+"&name="+adminName+"&phone="+phone+"&email="+email);
+                response.sendRedirect("/LBMS/auth/admin/signup.html?mode=SignUp&err=weak_password&email=" + email + "&name=" + adminName + "&phone=" + phone);
                 return;
             }
-            
+
             String hashedPassword = BCrypt.hashpw(password, BCrypt.gensalt());
 
+            // Generate a unique referral code
+            String generatedId = generateUniqueID();
 
             try (PreparedStatement insertStatement = conn.prepareStatement(insertSQL)) {
                 insertStatement.setString(1, adminName);
                 insertStatement.setString(2, email);
                 insertStatement.setString(3, phone);
                 insertStatement.setString(4, hashedPassword);
-                insertStatement.setString(5, generateUniqueID());
-
+                insertStatement.setString(5, generatedId); // Correctly set the referral code
 
                 int rowsInserted = insertStatement.executeUpdate();
                 if (rowsInserted > 0) {
-                	request.setAttribute("name", adminName);
-                    request.setAttribute("email", email);
-                    request.setAttribute("phone", phone);
-                    request.setAttribute("role", "admin");
-                    request.setAttribute("message", "Admin registered successfully.");
+                    session.setAttribute("name", adminName);
+                    session.setAttribute("email", email);
+                    session.setAttribute("phone", phone);
+                    session.setAttribute("referralCode", generatedId);
+                    session.setAttribute("role", "admin");
+                    session.setAttribute("message", "Admin registered successfully.");
                     response.sendRedirect("admin.jsp");
                 } else {
-                    request.setAttribute("message", "Admin registration failed.");
-                    request.getRequestDispatcher("/LBMS/auth/admin/signup.html").forward(request, response);
+                    session.setAttribute("message", "Admin registration failed.");
+                    response.sendRedirect("/LBMS/auth/admin/signup.html");
                 }
             }
-
         } catch (SQLException | ClassNotFoundException ex) {
             throw new ServletException("Database error", ex);
         }
     }
 
-    private void signInAdmin(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/lbms", "root", "root");
-        
+    protected void signInAdmin(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String email = request.getParameter("email");
+        String password = request.getParameter("password");
+
         String checkEmailSQL = "SELECT email FROM admin WHERE email = ?";
         String getPwsQuery = "SELECT password FROM admin WHERE email = ?";
         String getAdminQuery = "SELECT * FROM admin WHERE email = ?";
 
-
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
+        HttpSession session = request.getSession();
+        session.setMaxInactiveInterval(60 * 60 * 24 * 30); // Max 30 day session age
         
-        PreparedStatement checkEmailStatement = conn.prepareStatement(checkEmailSQL);
-        checkEmailStatement.setString(1, email);
-        ResultSet checkEmailStatementRs = checkEmailStatement.executeQuery();
-        
+        Connection conn = null;
+        PreparedStatement checkEmailStatement = null;
+        PreparedStatement getPwsStatement = null;
+        PreparedStatement getAdminStatement = null;
+        ResultSet checkEmailRs = null;
+        ResultSet getPwsRs = null;
+        ResultSet adminRs = null;
 
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/lbms", "root", "root");
 
-        if (checkEmailStatementRs.next()) {
-        	
-        	PreparedStatement getPws = conn.prepareStatement(getPwsQuery);
-        	getPws.setString(1, email);
-            ResultSet getPwsRs = getPws.executeQuery();
-            
-            String storedHashedPassword = getPwsRs.getString("password");
-            
+            checkEmailStatement = conn.prepareStatement(checkEmailSQL);
+            checkEmailStatement.setString(1, email);
+            checkEmailRs = checkEmailStatement.executeQuery();
 
-            boolean passwordMatch = BCrypt.checkpw(password, storedHashedPassword);
+            if (checkEmailRs.next()) {
+                getPwsStatement = conn.prepareStatement(getPwsQuery);
+                getPwsStatement.setString(1, email);
+                getPwsRs = getPwsStatement.executeQuery();
 
-            if (passwordMatch) {
-                PreparedStatement getAdmin = conn.prepareStatement(getAdminQuery);
-                getAdmin.setString(1, email);
-                ResultSet userResultSet = getAdmin.executeQuery();
+                if (getPwsRs.next()) {
+                    String storedHashedPassword = getPwsRs.getString("password");
 
-                if (userResultSet.next()) {
-                    String n = userResultSet.getString("name");
-                    String mail = userResultSet.getString("email");
-                    String ph = userResultSet.getString("phone");
-                    String referralCode = userResultSet.getString("referralCode");
+                    boolean passwordMatch = BCrypt.checkpw(password, storedHashedPassword);
 
-                    request.setAttribute("name", n);
-                    request.setAttribute("email", mail);
-                    request.setAttribute("phone", ph);
-                    request.setAttribute("referralCode", referralCode);
+                    if (passwordMatch) {
+                        getAdminStatement = conn.prepareStatement(getAdminQuery);
+                        getAdminStatement.setString(1, email);
+                        adminRs = getAdminStatement.executeQuery();
 
-                    response.sendRedirect("user.jsp");
+                        if (adminRs.next()) {
+                        	session.setAttribute("name", adminRs.getString("adminName"));
+                        	session.setAttribute("email", adminRs.getString("email"));
+                        	session.setAttribute("phone", adminRs.getString("phone"));
+                        	session.setAttribute("referralCode", adminRs.getString("referralCode"));
+                        	session.setAttribute("role", "admin");
+
+                            response.sendRedirect("admin.jsp");
+                        }
+                    } else {
+                        response.sendRedirect("/LBMS/auth/admin/signin.html?mode=SignIn&err=wrong_credentials&email=" + email);
+                    }
                 }
-                
-
-                userResultSet.close();
-                getAdmin.close();
             } else {
-                response.sendRedirect("/LBMS/?mode=SignIn&err=wrong_credentials&email="+email);
+                response.sendRedirect("/LBMS/auth/admin/signin.html?mode=SignIn&err=wrong_credentials");
             }
-        } else {
-            response.sendRedirect("/LBMS/?mode=SignIn&err=wrong_credentials");
+
+        } catch (ClassNotFoundException | SQLException e) {
+            throw new ServletException("Database error", e);
+        } finally {
+            try {
+                if (adminRs != null) adminRs.close();
+                if (getAdminStatement != null) getAdminStatement.close();
+                if (getPwsRs != null) getPwsRs.close();
+                if (getPwsStatement != null) getPwsStatement.close();
+                if (checkEmailRs != null) checkEmailRs.close();
+                if (checkEmailStatement != null) checkEmailStatement.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
-
-        checkEmailStatement.close();
-        checkEmailStatementRs.close();
     }
-    }
-}
-
+    
 private String generateUniqueID() {
     // Generate a random number between 100000 and 999999
     int randomNum = 100000 + (int)(Math.random() * 900000);
     return String.format("%06d", randomNum); // Ensure the ID is always 6 digits
 }
+}
+

@@ -54,7 +54,7 @@
             saveToLocalStorage('idOrDept', idOrDept);
             saveToLocalStorage('isLoggedIn', true);
         } else {
-            console.log("Can't set user data, maybe it already exists.");
+            console.log("Can't set user data, doens't have user data.");
         }
 
         // Populate profile data after saving to LocalStorage
@@ -102,7 +102,7 @@
             </div>
         </div>
         <div class="h-full flex items-start">
-            <button id="logoutButton" onclick="logout()" class="bg-[--secondary] py-2 px-3 text-white">Logout</button>
+            <button id="logoutButton" onclick="logout('user')" class="bg-[--secondary] py-2 px-3 text-white">Logout</button>
         </div>
     </div>
 

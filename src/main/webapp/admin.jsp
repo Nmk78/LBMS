@@ -33,6 +33,88 @@ pageEncoding="ISO-8859-1"%>
         background-color: rgba(0, 0, 0, 0.1);
       }
     </style>
+    
+    
+<script>
+    // Function to save data to LocalStorage
+    function saveToLocalStorage(key, value) {
+        localStorage.setItem(key, value);
+    }
+
+    // Function to get data from LocalStorage
+    function getFromLocalStorage(key) {
+        return localStorage.getItem(key);
+    }
+
+    // Function to populate profile data
+    function populateProfileData() {
+        let name = getFromLocalStorage("name");
+        let email = getFromLocalStorage("email");
+        let phone = getFromLocalStorage("phone");
+        let referralCode = getFromLocalStorage("referralCode");
+
+        document.getElementById("name").innerText = name || "No Name";
+        document.getElementById("email").innerText = email || "No Email";
+        document.getElementById("phone").innerText = phone || "No Phone";
+        document.getElementById("referralCode").innerText = referralCode || "No Referral Code";
+    }
+
+    // Function to handle page load and save data
+    function handlePageLoad() {
+        console.log("Page Loaded}");
+
+        // Use JSP to inject data into JavaScript
+
+                var name = "<%= session.getAttribute("name") != null ? session.getAttribute("name").toString() : "" %>";
+        var email = "<%= session.getAttribute("email") != null ? session.getAttribute("email").toString() : "" %>";
+        var phone = "<%= session.getAttribute("phone") != null ? session.getAttribute("phone").toString() : "" %>";
+        var referralCode = "<%= session.getAttribute("referralCode") != null ? session.getAttribute("referralCode").toString() : "" %>";
+        var role = "<%= session.getAttribute("role") != null ? session.getAttribute("role").toString() : "" %>";
+
+        console.log(name + email + phone + role + referralCode);
+        
+        // Only save if data is present
+        if (name && email && phone && referralCode && role) {
+            console.log("Setting data to localstorage");
+
+            saveToLocalStorage('name', name);
+            saveToLocalStorage('email', email);
+            saveToLocalStorage('phone', phone);
+            saveToLocalStorage('referralCode', referralCode);
+            saveToLocalStorage('isLoggedIn', true);
+            saveToLocalStorage('role', role);
+        } else {
+            console.log("Can't set user data, maybe it already exists.");
+        }
+
+        // Populate profile data after saving to LocalStorage
+        populateProfileData();
+    }
+
+    function hideContent() {
+        document.body.style.display = 'none'; // Hide entire body
+    }
+
+    // Function to check login status
+    function checkLoginStatus() {
+    	console.log("Checking")
+        const isLoggedIn = localStorage.getItem('role') == 'admin';
+        if (!isLoggedIn || isLoggedIn === "false") {
+            hideContent();
+            window.location.href = "/LBMS"; // Redirect to home page
+        }
+    }
+
+    window.onload = function() {
+        checkLoginStatus();
+        handlePageLoad();
+    };
+
+</script>
+
+<script type="text/javascript" src="${pageContext.request.contextPath}/scripts/logout.js"></script>
+
+    
   </head>
   <body class="relative">
     <!-- Navbar -->
@@ -481,11 +563,34 @@ pageEncoding="ISO-8859-1"%>
             </div>
           </button>
         </div>
-        <button
-          class="px-4 w-40 mx-auto py-2 text-red-800 hover:text-white hover:bg-red-800"
-        >
-          Sign Out
-        </button>
+
+        
+        <div class="p-4 relative">
+		    <!-- Button to show/hide profile -->
+		    <button id="toggleProfileBtn" 
+		          class="px-4 w-40 h-40 mx-auto py-2 text-blue-700 bg-blue-800 text-white"
+		    >
+		        Show Profile
+		    </button>
+		
+		    <!-- Hidden Profile Div -->
+		    <div id="adminProfile" class="mt-4 w-auto p-4 z-30 absolute top-0 right-48 bg-gray-100 rounded-lg shadow-md hidden">
+		        <h2 class="text-xl font-semibold mb-2">Admin Profile</h2>
+		        <p><strong>Name:</strong> <span id="name" class="text-gray-700"></span></p>
+		        <p><strong>Email:</strong> <span id="email" class="text-gray-700"></span></p>
+		        <p><strong>Phone:</strong> <span id="phone" class="text-gray-700"></span></p>
+		        <p><strong>Role:</strong> <span id="role" class="text-gray-700">Admin</span></p>
+		        <p><strong>Referral Code:</strong> <span id="referralCode" class="text-gray-700"></span></p>
+		        
+		                <button
+							onclick="logout('admin')"
+							class="px-4 w-30 mx-auto py-2 text-red-800 hover:text-white hover:bg-red-800"
+		        >
+		          Sign Out
+		        </button>
+		    </div>
+		</div>
+        
       </div>
 
       <!-- Bottom Content -->
@@ -761,8 +866,70 @@ pageEncoding="ISO-8859-1"%>
         document.getElementById("loanModal").classList.toggle("hidden");
       }
 
+      document.getElementById('toggleProfileBtn').addEventListener('click', function() {
+    	    const profileDiv = document.getElementById('adminProfile');
+    	    const toggleProfileBtn = document.getElementById('toggleProfileBtn');
 
+    	    if (profileDiv.classList.contains('hidden')) {
+    	        populateProfileData();
+    	        profileDiv.classList.remove('hidden');
+    	        this.textContent = 'Hide Profile';
+    	    } else {
+    	        profileDiv.classList.add('hidden');
+    	        this.textContent = 'Show Profile';
+    	    }
+    	});
 
-    </script>
+    	// Your existing functions to save to and retrieve from LocalStorage
+    	function saveToLocalStorage(key, value) {
+    	    localStorage.setItem(key, value);
+    	}
+
+    	function getFromLocalStorage(key) {
+    	    return localStorage.getItem(key);
+    	}
+
+    	// Populate the profile data when the div is shown
+    	function populateProfileData() {
+    	    document.getElementById("name").innerText = getFromLocalStorage("name") || "No Name";
+    	    document.getElementById("email").innerText = getFromLocalStorage("email") || "No Email";
+    	    document.getElementById("phone").innerText = getFromLocalStorage("phone") || "No Phone";
+    	    document.getElementById("referralCode").innerText = getFromLocalStorage("referralCode") || "No Referral Code";
+    	}
+
+    	// Fetch book data and populate sections
+    	fetch('/LBMS/books')
+    	  .then(response => response.json())
+    	  .then(data => {
+    	    console.log(data);
+    	    const books = data;
+
+    	    // Immediately Invoked Function Expression to handle books
+    	    (function(books) {
+    	      // Clear existing content
+    	      popularElements.forEach(element => element.innerHTML = '');
+    	      peopleChoicesElements.forEach(element => element.innerHTML = '');
+    	      exploreElements.forEach(element => element.innerHTML = '');
+
+    	      // Populate each section
+    	      books.slice(0, 20).forEach(book => {
+    	        const cardHTML = generateCard(book.name, book.image, book.author, book.availability, book.id);
+    	        popularElements.forEach(element => element.innerHTML += cardHTML);
+    	      });
+
+    	      books.slice(20, 30).forEach(book => {
+    	        const cardHTML = generateCard(book.name, book.image, book.author, book.availability, book.id);
+    	        peopleChoicesElements.forEach(element => element.innerHTML += cardHTML);
+    	      });
+
+    	      books.forEach(book => {
+    	        const cardHTML = generateCard(book.name, book.image, book.author, book.availability, book.id);
+    	        exploreElements.forEach(element => element.innerHTML += cardHTML);
+    	      });
+    	    })(books);  // Pass the books data to the IIFE
+    	  })
+    	  .catch(error => console.error('Error fetching books:', error));
+
+    </script>    
   </body>
 </html>
