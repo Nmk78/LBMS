@@ -17,31 +17,34 @@
     <div class="max-w-4xl mx-auto shadow-md rounded-lg p-6">
         <h1 onclick="back()" class="text-2xl font-bold mb-4 cursor-pointer">⬅️</h1>
         <h1 class="text-2xl font-bold mb-4">Search Results</h1>
-        <table class="min-w-full bg-white border border-gray-200">
-            <thead>
-                <tr>
-                    <th class="py-2 px-4 border-b">Title</th>
-                    <th class="py-2 px-4 border-b">Author</th>
-                    <th class="py-2 px-4 border-b">Category</th>
-                    <th class="py-2 px-4 border-b">Available</th>
-                </tr>
-            </thead>
-            <tbody>
-                <% 
-                ResultSet rs = (ResultSet) request.getAttribute("resultSet");
-                while (rs.next()) {
-                %>
-                    <tr class="border-b hover:bg-gray-100">
-                        <td class="py-2 px-4"><%= rs.getString("title") %></td>
-                        <td class="py-2 px-4"><%= rs.getString("authorName") %></td>
-                        <td class="py-2 px-4"><%= rs.getString("category") %></td>
-                        <td class="py-2 px-4"><%= rs.getBoolean("CopiesAvailable") ? "Yes" : "No" %></td>
-                    </tr>
-                <% 
-                }
-                %>
-            </tbody>
-        </table>
+			<table class="min-w-full bg-white border border-gray-200">
+			    <thead>
+			        <tr>
+			            <th class="py-2 px-4 border-b">Title</th>
+			            <th class="py-2 px-4 border-b">Author</th>
+			            <th class="py-2 px-4 border-b">Category</th>
+			            <th class="py-2 px-4 border-b">Available</th>
+			        </tr>
+			    </thead>
+			    <tbody>
+			        <% 
+			        ResultSet rs = (ResultSet) request.getAttribute("resultSet");
+			        while (rs.next()) {
+			            String bookId = rs.getString("Bid"); // Assuming 'Bid' is the column name for the book ID
+			        %>
+			            <tr class="border-b hover:bg-gray-100 cursor-pointer" 
+			                onclick="window.location.href='/LBMS/book?id=<%= bookId %>'">
+			                <td class="py-2 px-4"><%= rs.getString("title") %></td>
+			                <td class="py-2 px-4"><%= rs.getString("authorName") %></td>
+			                <td class="py-2 px-4"><%= rs.getString("category") %></td>
+			                <td class="py-2 px-4"><%= rs.getBoolean("CopiesAvailable") ? "Yes" : "No" %></td>
+			            </tr>
+			        <% 
+			        }
+			        %>
+			    </tbody>
+			</table>
+
     </div>
     <script>
     	let back = ()=>{

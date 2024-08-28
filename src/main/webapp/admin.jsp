@@ -394,7 +394,7 @@ pageEncoding="ISO-8859-1"%>
       <div class="bg-white rounded-lg shadow-lg p-8 w-1/3">
         <h2 class="text-2xl font-bold mb-6">Borrow book</h2>
 
-      <form id="loanForm" method="POST" action="/LBMS/BookServlet" class="space-y-4">
+      <form id="loanForm" method="POST" action="/LBMS/loan" class="space-y-4">
         <div>
           <label class="block text-sm font-medium">Book ID</label>
           <input
@@ -408,7 +408,7 @@ pageEncoding="ISO-8859-1"%>
                     <input
             type="hidden"
               name="action"
-              value="borrowBook"
+              value="add"
             />
         <div>
           <label class="text-sm font-medium">Member ID</label>
@@ -481,7 +481,7 @@ pageEncoding="ISO-8859-1"%>
             class="flex items-center max-w-72 space-x-7 border border-[--accent] justify-between bg-white p-6 shadow-md"
           >
             <div class="text-start space-y-4">
-              <div class="text-3xl font-bold">465</div>
+              <div id="totalBooks" class="text-3xl font-bold"></div>
               <div class="text-gray-600">Total Books</div>
             </div>
             <div
@@ -516,7 +516,7 @@ pageEncoding="ISO-8859-1"%>
             class="flex items-center max-w-72 space-x-7 border border-[--primary] justify-between bg-white p-6 shadow-md"
           >
             <div class="text-start space-y-4">
-              <div class="text-3xl font-bold">65</div>
+              <div id="borrowedBooks" class="text-3xl font-bold"></div>
               <div class="text-gray-600">Books Borrowed</div>
             </div>
             <div
@@ -535,7 +535,7 @@ pageEncoding="ISO-8859-1"%>
             class="flex items-center max-w-72 space-x-7 justify-between bg-white p-6 shadow-md"
           >
             <div class="text-start space-y-4">
-              <div class="text-3xl font-bold">465</div>
+              <div id="overdueBooks" class="text-3xl font-bold"></div>
               <div class="text-gray-600">Overdued Books</div>
             </div>
             <div
@@ -551,7 +551,7 @@ pageEncoding="ISO-8859-1"%>
             class="flex items-center max-w-72 space-x-7 justify-between bg-white p-6 shadow-md"
           >
             <div class="text-start space-y-4">
-              <div class="text-3xl font-bold">351</div>
+              <div id="totalMembers" class="text-3xl font-bold"></div>
               <div class="text-gray-600">Total Members</div>
             </div>
             <div
@@ -584,7 +584,7 @@ pageEncoding="ISO-8859-1"%>
 		        
 		                <button
 							onclick="logout('admin')"
-							class="px-4 w-30 mx-auto py-2 text-red-800 hover:text-white hover:bg-red-800"
+							class="px-4 w-30 z-10 mx-auto py-2 text-red-800 hover:text-white hover:bg-red-800"
 		        >
 		          Sign Out
 		        </button>
@@ -596,7 +596,7 @@ pageEncoding="ISO-8859-1"%>
       <!-- Bottom Content -->
       <div class="flex space-x-6">
         <div
-          class="w-2/3 min-h-[400px] h-[450px] relative overflow-y-scroll resizable bg-white shadow-md"
+          class="w-3/5 min-h-[400px] h-[450px] relative overflow-y-scroll resizable bg-white shadow-md"
         >
           <div
             class="flex sticky top-0 bg-gray-50 justify-between items-center mb-4 pb-2"
@@ -636,8 +636,8 @@ pageEncoding="ISO-8859-1"%>
                 <th class="py-2 px-4 border-b cursor-pointer" data-sort-books="id">
                   ID
                 </th>
-                <th class="py-2 px-4 border-b">Acquired By</th>
-                <th class="py-2 px-4 border-b"></th>
+                <th class="py-2 px-2 border-b">Acquired By</th>
+                <th class="py-2 px-2 border-b"></th>
               </tr>
             </thead>
             <tbody id="books-table-body">
@@ -648,7 +648,7 @@ pageEncoding="ISO-8859-1"%>
 
         <!-- Right Content -->
         <div id="loanTableContainer"
-          class="w-1/3 min-h-[400px] h-[450px] relative overflow-y-scroll resizable bg-white shadow-md"
+          class="w-2/5 min-h-[400px] h-[450px] relative overflow-y-scroll resizable bg-white shadow-md"
         >
           <div
             class="flex sticky top-0 bg-gray-50 justify-between items-center mb-4 pb-2"
@@ -656,30 +656,19 @@ pageEncoding="ISO-8859-1"%>
             <input
               type="text"
               id="loan-search-input"
-              class="border border-gray-300 py-2 px-4 w-full max-w-xs"
+              class="border border-gray-300 ring-0 py-2 px-4 w-full max-w-xs"
               placeholder="Search loans..."
             />
           </div>
           <table class="min-w-full bg-gray-50 z-10 border border-gray-300">
             <thead class="sticky top-12 py-1 w-full bg-gray-200 z-10">
               <tr  class="z-10">
-                <th class="py-2 px-4 border-b cursor-pointer" data-sort-loan="title">
+                <th class="py-2 w-full px-4 border-b cursor-pointer" data-sort-loan="title">
                   Title
                 </th>
-                <th
-                  class="py-2 px-4 border-b cursor-pointer"
-                  data-sort-loan="author"
-                >
-                  Author
-                </th>
-                <th
-                  class="py-2 px-4 border-b cursor-pointer"
-                  data-sort-loan="category"
-                >
-                  Category
-                </th>
-                <th class="py-2 w-full px-4 border-b">Status</th>
-				<th class="py-2 w-full px-4 border-b"></th>
+				<th class="py-2 w-[100px] px-4 border-b">Borrower</th>
+                <th class="py-2 w-[100px] px-4 border-b">Due</th>
+				<th class="py-2 w-[60px] px-4 border-b"></th>
                 
               </tr>
             </thead>
@@ -897,38 +886,6 @@ pageEncoding="ISO-8859-1"%>
     	    document.getElementById("referralCode").innerText = getFromLocalStorage("referralCode") || "No Referral Code";
     	}
 
-    	// Fetch book data and populate sections
-    	fetch('/LBMS/books')
-    	  .then(response => response.json())
-    	  .then(data => {
-    	    console.log(data);
-    	    const books = data;
-
-    	    // Immediately Invoked Function Expression to handle books
-    	    (function(books) {
-    	      // Clear existing content
-    	      popularElements.forEach(element => element.innerHTML = '');
-    	      peopleChoicesElements.forEach(element => element.innerHTML = '');
-    	      exploreElements.forEach(element => element.innerHTML = '');
-
-    	      // Populate each section
-    	      books.slice(0, 20).forEach(book => {
-    	        const cardHTML = generateCard(book.name, book.image, book.author, book.availability, book.id);
-    	        popularElements.forEach(element => element.innerHTML += cardHTML);
-    	      });
-
-    	      books.slice(20, 30).forEach(book => {
-    	        const cardHTML = generateCard(book.name, book.image, book.author, book.availability, book.id);
-    	        peopleChoicesElements.forEach(element => element.innerHTML += cardHTML);
-    	      });
-
-    	      books.forEach(book => {
-    	        const cardHTML = generateCard(book.name, book.image, book.author, book.availability, book.id);
-    	        exploreElements.forEach(element => element.innerHTML += cardHTML);
-    	      });
-    	    })(books);  // Pass the books data to the IIFE
-    	  })
-    	  .catch(error => console.error('Error fetching books:', error));
 
     </script>    
   </body>

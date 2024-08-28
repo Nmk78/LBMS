@@ -75,9 +75,9 @@
     <!-- Profile Header -->
     <div class="flex h-full items-center border-b border-gray-200 pb-4 space-x-5">
         <img
-            src="./assets/img/sample4.jpg"
+            src="./assets/img/avatar.svg"
             alt="Profile Picture"
-            class="h-36 aspect-square rounded-0 object-cover mr-6"
+            class="h-44 object-contain mr-6"
         />
         <div class="border-r border-gray-200 pr-4">
             <div id="nameAndAchievement" class="flex gap-2">
@@ -106,6 +106,15 @@
         </div>
     </div>
 
+    <!-- Loan Details -->
+    <div class="mt-6">
+        <h2 class="text-xl font-semibold text-[--secondary] mb-4">Borrowed</h2>
+        <section
+            id="borrowedContainer"
+            class="w-full flex flex-wrap mx-auto h-full mb-5 gap-5"
+        ></section>
+    </div>
+    
     <!-- Profile Details -->
     <div class="mt-6">
         <h2 class="text-xl font-semibold text-[--secondary] mb-4">Saved</h2>

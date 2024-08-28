@@ -33,7 +33,11 @@ public class books extends HttpServlet {
         JsonArray jsonArray = new JsonArray();
         
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
-             PreparedStatement stmt = conn.prepareStatement("SELECT Bid, Title, Image, AuthorName, CopiesAvailable FROM book")) {
+        		PreparedStatement stmt = conn.prepareStatement(
+        			    "SELECT Bid, Title, category, Image, AuthorName, CopiesAvailable FROM book ORDER BY CreatedAt DESC"
+        			)
+            		 )
+        {
 
             ResultSet rs = stmt.executeQuery();
             
@@ -42,6 +46,7 @@ public class books extends HttpServlet {
                 int bookId = rs.getInt("Bid");
                 jsonObject.addProperty("id", bookId);
                 jsonObject.addProperty("name", rs.getString("Title"));
+                jsonObject.addProperty("category", rs.getString("category"));
 
                 // Handle image encoding
                 byte[] imageBytes = rs.getBytes("Image");

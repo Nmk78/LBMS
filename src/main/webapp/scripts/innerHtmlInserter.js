@@ -12,7 +12,8 @@
 
 const navContainer = document.getElementById("nav");
 
-let isLoggedIn = localStorage.getItem("isLoggedIn")
+let isLoggedIn = localStorage.getItem("isLoggedIn");
+let role = localStorage.getItem("role");
 
 const url = new URL(window.location);
 path = url.pathname.split("/");
@@ -68,17 +69,17 @@ const navInnerHtml = `      <div id="logo" class="w-1/3">
           </button>
         </form>
        ${isLoggedIn ? `
-            <a href="/LBMS/user.jsp" id="userProfile" class="h-2/3">
-                <img src="assets/img/sample4.jpg" alt="User Profile" class="w-12 h-12" />
-            </a>
-        ` : `
-            <button
-                id="openModalBtn"
-                class="h-2/3 border-b-2 py-[5px] px-3 flex items-center border-[--secondary] bg-[--secondary] text-gray-200 text-center"
-            >
-                Sign In
-            </button>
-        `}
+		    <a href="${role === 'admin' ? '/LBMS/admin.jsp' : '/LBMS/user.jsp'}" id="userProfile" class="h-full">
+		        <img src="assets/img/avatar.svg" alt="User Profile" class="h-16" />
+		    </a>
+		` : `
+		    <button
+		        id="openModalBtn"
+		        class="h-2/3 border-b-2 py-[5px] px-3 flex items-center border-[--secondary] bg-[--secondary] text-gray-200 text-center"
+		    >
+		        Sign In
+		    </button>
+		`}
       </div>`;
 
 navContainer.innerHTML = navInnerHtml;

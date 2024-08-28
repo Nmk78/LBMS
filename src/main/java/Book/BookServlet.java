@@ -386,6 +386,7 @@ private void addOrUpdateRating(HttpServletRequest request, Connection conn, Http
     
     int bookId = 0;
     int rating = 0;
+    int memberId = 0;
 
     // Validate and parse input parameters
     if (bookIdStr != null && !bookIdStr.isEmpty()) {
@@ -400,11 +401,18 @@ private void addOrUpdateRating(HttpServletRequest request, Connection conn, Http
         return;
     }
 
-    if (memberIdStr == null || memberIdStr.isEmpty()) {
+    if (memberIdStr != null && !memberIdStr.isEmpty()) {
+        try {
+        	memberId = Integer.parseInt(memberIdStr);
+        } catch (NumberFormatException e) {
+            response.getWriter().write("Invalid member ID format");
+            return;
+        }
+    } else {
         response.getWriter().write("Member ID is required");
         return;
     }
-
+    
     if (ratingStr != null && !ratingStr.isEmpty()) {
         try {
             rating = Integer.parseInt(ratingStr);
@@ -425,7 +433,7 @@ private void addOrUpdateRating(HttpServletRequest request, Connection conn, Http
     String checkRatingQuery = "SELECT RatingValue FROM rating WHERE BookId = ? AND MemberId = ?";
     try (PreparedStatement checkStmt = conn.prepareStatement(checkRatingQuery)) {
         checkStmt.setInt(1, bookId);
-        checkStmt.setString(2, memberIdStr);
+        checkStmt.setInt(2, memberId);
         try (ResultSet rs = checkStmt.executeQuery()) {
             if (rs.next()) {
                 // Rating exists, so update it
@@ -433,7 +441,7 @@ private void addOrUpdateRating(HttpServletRequest request, Connection conn, Http
                 try (PreparedStatement updateStmt = conn.prepareStatement(updateRatingQuery)) {
                     updateStmt.setInt(1, rating);
                     updateStmt.setInt(2, bookId);
-                    updateStmt.setString(3, memberIdStr);
+                    updateStmt.setInt(3, memberId);
                     int rowsUpdated = updateStmt.executeUpdate();
                     if (rowsUpdated > 0) {
                         String message = "Rated This Book";
@@ -450,7 +458,7 @@ private void addOrUpdateRating(HttpServletRequest request, Connection conn, Http
                 String insertRatingQuery = "INSERT INTO rating (BookId, MemberId, RatingValue, CreatedAt) VALUES (?, ?, ?, NOW())";
                 try (PreparedStatement insertStmt = conn.prepareStatement(insertRatingQuery)) {
                     insertStmt.setInt(1, bookId);
-                    insertStmt.setString(2, memberIdStr);
+                    insertStmt.setInt(2, memberId);
                     insertStmt.setInt(3, rating);
                     int rowsInserted = insertStmt.executeUpdate();
                     if (rowsInserted > 0) {
@@ -474,7 +482,7 @@ private void addOrUpdateRating(HttpServletRequest request, Connection conn, Http
 private void borrowBook(HttpServletRequest request, Connection conn, HttpServletResponse response) throws ServletException, IOException {
     // Retrieve form parameters
 	int bookId = Integer.parseInt(request.getParameter("bookid"));
-	String memberId = request.getParameter("memberid"); // Change to String
+	String memberId =request.getParameter("memberid"); // Change to String
 	String loanDate = request.getParameter("loanDate");
 	String returnDate = request.getParameter("returnDate");
 	String dueDate = request.getParameter("dueDate");
