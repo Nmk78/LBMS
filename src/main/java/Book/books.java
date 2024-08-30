@@ -34,7 +34,7 @@ public class books extends HttpServlet {
         
         try (Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
         		PreparedStatement stmt = conn.prepareStatement(
-        			    "SELECT Bid, Title, category, Image, AuthorName, CopiesAvailable FROM book ORDER BY CreatedAt DESC"
+        			    "SELECT Bid, Title, CreatedAt, BookShelf, Copy, category, Image, AuthorName, CopiesAvailable, AcquireBy FROM book ORDER BY CreatedAt DESC"
         			)
             		 )
         {
@@ -46,7 +46,11 @@ public class books extends HttpServlet {
                 int bookId = rs.getInt("Bid");
                 jsonObject.addProperty("id", bookId);
                 jsonObject.addProperty("name", rs.getString("Title"));
+                jsonObject.addProperty("addedDate", rs.getString("CreatedAt"));
+                jsonObject.addProperty("copy", rs.getInt("Copy"));
+                jsonObject.addProperty("bookShelf", rs.getString("BookShelf"));
                 jsonObject.addProperty("category", rs.getString("category"));
+                jsonObject.addProperty("AcquireBy", rs.getString("AcquireBy"));
 
                 // Handle image encoding
                 byte[] imageBytes = rs.getBytes("Image");
@@ -57,8 +61,6 @@ public class books extends HttpServlet {
                     image = "./assets/img/defaultCover.png"; // Default image URL
                 }
                 jsonObject.addProperty("image", image);
-                
-
                 
                 jsonObject.addProperty("author", rs.getString("AuthorName"));
 

@@ -3,28 +3,56 @@
 <%@ page import="com.google.gson.JsonObject, com.google.gson.JsonArray, com.google.gson.JsonElement, com.google.gson.JsonParser" %> 
 
 <%
-    String bookId = ""; // Assuming the book ID is passed as a request parameter
+    // Initialize variables
+    String bookId = "";
     String title = "";
     String author = "";
     String category = "";
     String availability = "";
     String image = "";
     double rating = 0.0;
+    double userRating = 0.0;
+    String reservationStatus = "Not Reserved"; // Default reservation status
 
+    // Retrieve book data from the request attribute
     String bookJson = (String) request.getAttribute("book");
     JsonObject book = new Gson().fromJson(bookJson, JsonObject.class);
 
     if (book != null) {
-        // Display book details and reviews
-		bookId = book.get("id").getAsString();
+       // Retrieve and display book details
+        bookId = book.get("id").getAsString();
         title = book.get("title").getAsString();
         author = book.get("author").getAsString();
         category = book.get("category").getAsString();
         availability = book.get("availability").getAsString();
         image = book.get("image").getAsString();
         rating = book.get("averageRating").getAsDouble();
+        userRating = book.get("userRating").getAsDouble();
+
+        // Set reservation status if available
+        if (book.has("reservationStatus")) {
+            reservationStatus = book.get("reservationStatus").getAsString();
+        }
+
+        // Log the data
+                System.out.println("Logging From Book.jsp" );
+        System.out.println("Book ID: " + bookId);
+        System.out.println("Title: " + title);
+        System.out.println("Author: " + author);
+        System.out.println("Category: " + category);
+        System.out.println("Availability: " + availability);
+        System.out.println("Image: " + image);
+        System.out.println("Average Rating: " + rating);
+        System.out.println("User Rating: " + userRating);
+        System.out.println("Reservation Status: " + reservationStatus);
+    } else {
+        System.out.println("No book data found.");
     }
+
+    // Determine if the book is reserved
+    boolean isReserved = "Pending".equalsIgnoreCase(reservationStatus);
 %>
+
 
 
 <!DOCTYPE html>
@@ -247,9 +275,20 @@
 							    <%= availability %>
 							</span>
 						</p>
-							<button title="You will need to get and borrow this book in library" class="bg-blue-500 text-white font-semibold py-2 px-4 shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition ease-in-out duration-150">
-							    Reserve This Book
-							</button>
+<!-- Form for reserving or canceling reservation -->
+<form id="reserveForm" action="/LBMS/reservation" method="post">
+    <input type="hidden" name="bookId" value="<%= bookId %>" />
+    <input type="hidden" id="MemberId" name="memberId" value="" />
+    <input type="hidden" name="action" id="formAction" value="<%= isReserved ? "cancel" : "create" %>" />
+
+    <button 
+        id="<%= isReserved ? "cancelReserveButton" : "reserveButton" %>"
+        title="<%= isReserved ? "You have already reserved this book" : "You will need to get and borrow this book in the library" %>"
+        class="bg-blue-500 text-white font-semibold py-2 px-4 shadow-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 transition ease-in-out duration-150">
+        <%= isReserved ? "Cancel Reservation" : "Reserve This Book" %>
+    </button>
+</form>
+
 					</div>
                 </div>
             </div>
@@ -295,11 +334,11 @@
     <h3 class="text-2xl font-semibold mb-4">Submit a Review</h3>
     <div class="mb-4">
         <input type="hidden" id="MemberId" name="MemberId" value="" />
-            <input type="hidden" name="bookId" value="<%= bookId %>" />
+            <input type="hidden" id="hiddenBookId" name="bookId" value="<%= bookId %>" />
             
         <input type="hidden" name="action" value="addReview" />
         <label for="reviewContent" class="block text-lg font-medium mb-2">Your Review</label>
-        <textarea id="reviewContent" name="reviewContent" rows="4" class="w-full p-2 border border-gray-300 rounded" required></textarea>
+        <textarea id="reviewContent" name="reviewContent" rows="5" class="w-full p-2 border border-gray-300 rounded" required></textarea>
     </div>
 
     <button type="submit" class="w-full bg-[--secondary] hover:bg-blue-600 text-white p-2 rounded">Submit Review</button>
@@ -381,20 +420,68 @@
 
             localStorage.setItem('savedBooks', JSON.stringify(savedBooks));
         });
+        
+        ///Reservation and Cancelling
+         function reserveBook() {
+            const memberId = localStorage.getItem("idOrDept");
+            const bookId = document.getElementById('hiddenBookId').value;
 
+            fetch('<%= request.getContextPath() %>/reservation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=create&memberId=${memberId}&bookId=${bookId}`
+            })
+            .then(response => response.text())
+            .then(result => {
+                alert('Reservation made: ' + result);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function cancelReservation() {
+            const reservationId = document.getElementById('reservationId').value;
+
+            fetch('<%= request.getContextPath() %>/reservation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `action=cancel&reservationId=${reservationId}`
+            })
+            .then(response => response.text())
+            .then(result => {
+                alert('Reservation cancelled: ' + result);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        //document.getElementById('reserveButton').addEventListener('click', reserveBook);
+        //document.getElementById('cancelButton').addEventListener('click', cancelReservation);
     
     
         // Example JavaScript for handling the star rating and review submission
+
         document.addEventListener('DOMContentLoaded', () => {
+        	
 			///Set id values
-			const memberIdInputs = document.querySelectorAll("#MemberId");
-			const idOrDept = localStorage.getItem("idOrDept");
-			
-			memberIdInputs.forEach(input => {
-			  input.value = idOrDept;
-			});
-        	  
-           
+		    const memberIdInputs = document.querySelectorAll("#MemberId");
+		    const idOrDept = localStorage.getItem("idOrDept");
+		
+		    if (idOrDept) {
+		    	console.log("Setting IDS")
+		        memberIdInputs.forEach(input => {
+		            input.value = idOrDept; // Set the value for each input element
+		        });
+		    } else {
+		        console.error("No 'idOrDept' found in localStorage.");
+		    }
+	        	 
             /// Rating
 
             const starInputs = document.querySelectorAll('input[name="rating"]');
@@ -421,7 +508,11 @@
             if (preExistingRating > 0) {
                 updateStars(preExistingRating);
             }
+            var userRating = <%= userRating %>;
 
+            if (userRating > 0) {
+                updateStars(userRating);
+            }
             // Add event listener to each radio input
             starInputs.forEach((input) => {
                 input.addEventListener('change', () => {
@@ -429,7 +520,9 @@
                     updateStars(ratingValue);
                 });
             });
+            
         });
+
     </script>
 </body>
 </html>

@@ -1,3 +1,87 @@
+function viewLoan(loanId) {
+  const loanModal = document.getElementById("viewLoanModal");
+  const loadingText = document.getElementById("loadingText");
+  const loanDetails = document.getElementById("loanDetails");
+  const closeModal = document.getElementById("closeModal");
+
+  // Show the modal and loading text
+  loanModal.classList.remove("hidden");
+  loadingText.classList.remove("hidden");
+  loanDetails.classList.add("hidden");
+
+  fetch(`/LBMS/loan?action=view&loanId=${loanId}`)
+    .then(response => response.json())
+    .then(data => {
+      console.log("View Loans", data);
+
+	let img = `<img class="w-full h-full object-cover transition-transform group-hover:scale-110" src="${data.image}" alt="Book">`
+
+      // Populate the modal with loan details
+      document.getElementById("imageContainer").innerHTML = img;
+      
+      document.getElementById("loanId").textContent = data.id;
+      document.getElementById("bookName").textContent = data.name;
+      document.getElementById("memberName").textContent = data.memberName;
+      document.getElementById("dueingDate").textContent = formatDate(data.dueDate);
+
+      // Hide loading text and show loan details
+      loadingText.classList.add("hidden");
+      loanDetails.classList.remove("hidden");
+    })
+    .catch(error => {
+      console.error('Error fetching loan details:', error);
+      // Optionally, you could show an error message in the modal here
+      loadingText.textContent = "Error loading data.";
+    });
+
+  // Close modal on button click
+  closeModal.addEventListener("click", () => {
+    loanModal.classList.add("hidden");
+  });
+}
+
+function formatDate(dateString) {
+    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', options);
+}
+
+document.getElementById("extendLoanBtn").addEventListener("click", function() {
+    const loanId = document.getElementById("loanId").textContent;
+
+    fetch(`/LBMS/loan?action=extend&loanId=${loanId}`, { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Loan extended successfully!");
+                // Optionally, update the due date in the modal
+                document.getElementById("dueDate").textContent = formatDate(new Date(new Date().setDate(new Date().getDate() + 5)));
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => console.error('Error extending loan:', error));
+});
+
+document.getElementById("returnLoanBtn").addEventListener("click", function() {
+    const loanId = document.getElementById("loanId").textContent;
+
+    fetch(`/LBMS/loan?action=return&loanId=${loanId}`, { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Loan marked as returned!");
+                // Optionally, update the UI to reflect the return
+                loanModal.classList.add("hidden");
+                listLoans(); // Refresh the loan list to remove the returned loan
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => console.error('Error marking loan as returned:', error));
+});
+
+
 document.addEventListener("DOMContentLoaded", function () {
 	  console.log("Loading Status");
 
@@ -32,15 +116,8 @@ document.addEventListener("DOMContentLoaded", function () {
   const bookSearchInput = document.getElementById("books-search-input");
   const loanSearchInput = document.getElementById("loan-search-input");
   // Example function to view a specific loan
-  function viewLoan(loanId) {
-    fetch(`/LBMS/loan?action=view&loanId=${loanId}`)
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        // Process the data received from the server
-      })
-      .catch(error => console.error('Error fetching loan details:', error));
-  }
+
+
 
 
   function renderBooksTable(data) {
@@ -56,9 +133,9 @@ document.addEventListener("DOMContentLoaded", function () {
         <td class="py-2 px-4">${book.category}</td>
         <td class="py-2 px-4">${book.availability}</td>
         <td class="py-2 px-4">${book.id}</td>
-        <td class="py-2 px-4">${book.acquireBy}</td>
+        <td class="py-2 px-4">${book.AcquireBy}</td>
         <td class="py-2 px-4">
-          <button class="bg-blue-500 text-white px-3 py-1 hover:bg-blue-700" onclick="editBook(${book.id})">Edit</button>
+			<button class="bg-blue-500 text-white px-3 py-1 hover:bg-blue-700" onclick='editBook(${JSON.stringify(book)})'>Edit</button>
         </td>
       `;
       booksTableBody.appendChild(row);
@@ -79,13 +156,13 @@ function renderLoanTable(data) {
 
     const row = `
       <tr class="border-b hover:bg-gray-100">
-        <td class="py-2 px-2 line-clamp-4">${loan.bookTitle}</td>
+        <td class="py-2 px-2 line-clamp-4">${loan.name}</td>
         <td class="py-2 px-2 w-[100px] truncate">${loan.memberName}</td>
         <td class="py-2 w-[100px] px-2 ${isOverdue ? 'bg-red-500 text-white' : ''}">
           ${formatDate(loan.dueDate)}
         </td>
         <td class="py-2 px-2">
-          <button class="bg-blue-500 text-white px-3 py-1 hover:bg-blue-700" onclick="viewLoan(${loan.loanId})">View</button>
+          <button class="bg-blue-500 text-white px-3 py-1 hover:bg-blue-700" onclick="viewLoan(${loan.id})">View</button>
         </td>
       </tr>
     `;
@@ -108,12 +185,13 @@ function renderLoanTable(data) {
   }
 
   function filterTable(query, data) {
+	console.log(data)
     return data.filter((item) => {
       return (
-        item.title.toLowerCase().includes(query) ||
+        item.name.toLowerCase().includes(query) ||
         (item.author && item.author.toLowerCase().includes(query)) ||
-        item.category.toLowerCase().includes(query) ||
-        (item.memberName && item.memberName.toLowerCase().includes(query))
+        item.category.toLowerCase().includes(query) 
+        //||(item.memberName && item.memberName.toLowerCase().includes(query))
       );
     });
   }
@@ -153,6 +231,7 @@ function renderLoanTable(data) {
       books = data;
       sortedBooks = [...books]; // Initialize sortedBooks with the fetched data
       renderBooksTable(books);
+      console.log(books)
     })
     .catch(error => console.error('Error fetching books:', error));
 
@@ -164,6 +243,7 @@ function renderLoanTable(data) {
         loans = data;
         sortedLoans = [...loans]; // Initialize sortedLoans with the fetched data
         renderLoanTable(loans);
+        console.log("Loans", loans)
       })
       .catch(error => console.error('Error fetching loan list:', error));
   }

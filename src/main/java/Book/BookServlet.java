@@ -172,25 +172,30 @@ private void editBook(HttpServletRequest request, Connection conn, HttpServletRe
     String title = request.getParameter("title");
     String author = request.getParameter("author");
     String addedDateStr = request.getParameter("addedDate");
-    String bookShelf = request.getParameter("bookShelf");
-    String copiesAvailableStr = request.getParameter("copy");
-    String acquireBy = request.getParameter("acquireBy");
+    String bookShelf = request.getParameter("bookshelf");
+    String copy = request.getParameter("copy");
+    String acquireBy = request.getParameter("acquireby");
 
-    int addedDate = 0;
     int copiesAvailable = 0;
+
+
+    Date addedDate = null;
 
     if (addedDateStr != null && !addedDateStr.isEmpty()) {
         try {
-            addedDate = Integer.parseInt(addedDateStr);
-        } catch (NumberFormatException e) {
-            response.getWriter().write("Invalid year format");
+            // Assuming the date format is YYYY-MM-DD
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            java.util.Date parsedDate = sdf.parse(addedDateStr);
+            addedDate = new Date(parsedDate.getTime());
+        } catch (ParseException e) {
+            response.getWriter().write("Invalid date format");
             return;
         }
     }
 
-    if (copiesAvailableStr != null && !copiesAvailableStr.isEmpty()) {
+    if (copy != null && !copy.isEmpty()) {
         try {
-            copiesAvailable = Integer.parseInt(copiesAvailableStr);
+            copiesAvailable = Integer.parseInt(copy);
         } catch (NumberFormatException e) {
             response.getWriter().write("Invalid copies available format");
             return;
@@ -199,48 +204,52 @@ private void editBook(HttpServletRequest request, Connection conn, HttpServletRe
 
     Part filePart = request.getPart("image");
     InputStream inputStream = null;
+    
+    if (filePart != null && filePart.getSize() > 0) {
+        inputStream = filePart.getInputStream();
+        System.out.println("Image file size: " + filePart.getSize());
+    } else {
+        System.out.println("No image file uploaded or file is empty.");
+    }
 
     if (filePart != null && filePart.getSize() > 0) {
         inputStream = filePart.getInputStream();
     }
 
-    // Check and insert author if necessary, then update book
-    String checkAuthorQuery = "SELECT COUNT(*) FROM author WHERE Aname = ?";
-    try (PreparedStatement checkAuthorStmt = conn.prepareStatement(checkAuthorQuery)) {
-        checkAuthorStmt.setString(1, author);
-        ResultSet rs = checkAuthorStmt.executeQuery();
+    
+    System.out.println("Title: " + title);
+    System.out.println("Author: " + author);
+    System.out.println("AddedDate: " + addedDate);
+    System.out.println("BookShelf: " + bookShelf);
+    System.out.println("AcquireBy: " + acquireBy);
 
-        if (rs.next() && rs.getInt(1) == 0) {
-            String insertAuthorQuery = "INSERT INTO author (Aname) VALUES (?)";
-            try (PreparedStatement insertAuthorStmt = conn.prepareStatement(insertAuthorQuery)) {
-                insertAuthorStmt.setString(1, author);
-                insertAuthorStmt.executeUpdate();
-            }
-        }
-    }
 
-    String updateBookQuery = "UPDATE book SET Title = ?,  AuthorName = ?, addedDate = ?, BookShelf = ?, CopiesAvailable = ?, AcquireBy = ?, Image = ? WHERE BookId = ?";
+    String updateBookQuery = "UPDATE book SET Title = ?, AuthorName = ?, AddedDate = ?, BookShelf = ?, CopiesAvailable = ?, AcquireBy = ?, Image = ? WHERE Bid = ?";
     try (PreparedStatement updateBookStmt = conn.prepareStatement(updateBookQuery)) {
+        // Set the parameters
         updateBookStmt.setString(1, title);
         updateBookStmt.setString(2, author);
-        updateBookStmt.setInt(3, addedDate);
-        updateBookStmt.setString(4, bookShelf);
+        updateBookStmt.setDate(3, addedDate);
+        updateBookStmt.setString(4, bookShelf != null && !bookShelf.trim().isEmpty() ? bookShelf : null);
         updateBookStmt.setInt(5, copiesAvailable);
-        updateBookStmt.setString(6, acquireBy);
+        updateBookStmt.setString(6, acquireBy != null && !acquireBy.trim().isEmpty() ? acquireBy : null);
 
+        // Handle the image blob
         if (inputStream != null) {
             updateBookStmt.setBlob(7, inputStream);
         } else {
             updateBookStmt.setNull(7, java.sql.Types.BLOB);
         }
 
-        updateBookStmt.setInt(9, bookId);
+        updateBookStmt.setInt(8, bookId);
 
+        // Execute the update
         int rowsAffected = updateBookStmt.executeUpdate();
         String message = rowsAffected > 0 ? "Book updated successfully" : "Failed to update book";
         request.setAttribute("message", message);
         request.getRequestDispatcher("/admin.jsp").forward(request, response);
     }
+
 }
 
 private void deleteBook(HttpServletRequest request, Connection conn, HttpServletResponse response) throws ServletException, IOException, SQLException {
@@ -381,7 +390,7 @@ private void deleteReview(HttpServletRequest request, Connection conn, HttpServl
 private void addOrUpdateRating(HttpServletRequest request, Connection conn, HttpServletResponse response) 
         throws ServletException, IOException, SQLException {
     String bookIdStr = request.getParameter("bookId");
-    String memberIdStr = request.getParameter("memberId"); // memberId is a String, no parsing to int needed
+    String memberIdStr = request.getParameter("memberId"); 
     String ratingStr = request.getParameter("rating");
     
     int bookId = 0;
@@ -403,7 +412,7 @@ private void addOrUpdateRating(HttpServletRequest request, Connection conn, Http
 
     if (memberIdStr != null && !memberIdStr.isEmpty()) {
         try {
-        	memberId = Integer.parseInt(memberIdStr);
+            memberId = Integer.parseInt(memberIdStr);
         } catch (NumberFormatException e) {
             response.getWriter().write("Invalid member ID format");
             return;
@@ -443,15 +452,8 @@ private void addOrUpdateRating(HttpServletRequest request, Connection conn, Http
                     updateStmt.setInt(2, bookId);
                     updateStmt.setInt(3, memberId);
                     int rowsUpdated = updateStmt.executeUpdate();
-                    if (rowsUpdated > 0) {
-                        String message = "Rated This Book";
-                        request.setAttribute("message", message);
-                        response.sendRedirect(request.getContextPath() + "/book?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
-                    } else {
-                        String message = "Failed to update this Book";
-                        request.setAttribute("message", message);
-                        response.sendRedirect(request.getContextPath() + "/book?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
-                        }
+                    String message = rowsUpdated > 0 ? "Rated This Book" : "Failed to update this Book";
+                    response.sendRedirect(request.getContextPath() + "/book?id=" + bookId + "&user=" + memberId + "&message=" + URLEncoder.encode(message, "UTF-8"));
                 }
             } else {
                 // Rating does not exist, so insert a new one
@@ -461,15 +463,8 @@ private void addOrUpdateRating(HttpServletRequest request, Connection conn, Http
                     insertStmt.setInt(2, memberId);
                     insertStmt.setInt(3, rating);
                     int rowsInserted = insertStmt.executeUpdate();
-                    if (rowsInserted > 0) {
-                        String message = "Rated This Book";
-                        request.setAttribute("message", message);
-                        response.sendRedirect(request.getContextPath() + "/book?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
-                    } else {
-                        String message = "Failed to rate";
-                        request.setAttribute("message", message);
-                        response.sendRedirect(request.getContextPath() + "/book?id=" + bookId + "&message=" + URLEncoder.encode(message, "UTF-8"));
-                    }
+                    String message = rowsInserted > 0 ? "Rated This Book" : "Failed to rate";
+                    response.sendRedirect(request.getContextPath() + "/book?id=" + bookId + "&user=" + memberId + "&message=" + URLEncoder.encode(message, "UTF-8"));
                 }
             }
         }
@@ -478,6 +473,7 @@ private void addOrUpdateRating(HttpServletRequest request, Connection conn, Http
         response.getWriter().write("An error occurred while processing the rating");
     }
 }
+
 
 private void borrowBook(HttpServletRequest request, Connection conn, HttpServletResponse response) throws ServletException, IOException {
     // Retrieve form parameters

@@ -14,6 +14,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @WebServlet("/loan")
@@ -41,15 +42,26 @@ public class loan extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String action = request.getParameter("action");
-        if ("add".equals(action)) {
+        switch (action) {
+        case "add":
             addLoan(request, response);
-        } else if ("update".equals(action)) {
+            break;
+        case "update":
             updateLoan(request, response);
-        } else if ("delete".equals(action)) {
+            break;
+        case "delete":
             deleteLoan(request, response);
-        } else {
+            break;
+        case "extend":
+            extendLoan(request, response);
+            break;
+        case "return":
+            markAsReturned(request, response);
+            break;
+        default:
             sendError(response, "Unspecified action");
-        }
+            break;
+    }
     }
 
     private Connection getConnection() throws SQLException {
@@ -58,7 +70,7 @@ public class loan extends HttpServlet {
 
     private void listLoans(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-    	String query = "SELECT l.*, b.title as bookTitle, m.name as memberName " +
+    	String query = "SELECT l.*, b.title as name, b.Image as image, m.name as memberName " +
                 "FROM loan l " +
                 "JOIN book b ON l.bookid = b.Bid " +
                 "JOIN member m ON l.memberid = m.idOrDept " +
@@ -71,6 +83,13 @@ public class loan extends HttpServlet {
 
             List<LoanClass> loans = new ArrayList<>();
             while (rs.next()) {
+                byte[] imageBytes = rs.getBytes("image");
+                String imageStr = "";
+                if (imageBytes != null && imageBytes.length > 0) {
+                	imageStr = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
+                } else {
+                	imageStr = "./assets/img/defaultCover.png"; // Default image URL
+                }
                 LoanClass loan = new LoanClass(
                     rs.getInt("id"),
                     rs.getInt("bookid"),
@@ -80,8 +99,10 @@ public class loan extends HttpServlet {
                     rs.getDate("dueDate"),
                     rs.getString("status"),
                     rs.getString("notes"),
-                    rs.getString("bookTitle"), // Add book title
-                    rs.getString("memberName") // Add member name
+                    rs.getString("name"), // Add book title
+                    rs.getString("memberName"), // Add member name
+                    imageStr // Image field
+
                 );
                 loans.add(loan);
             }
@@ -96,7 +117,7 @@ public class loan extends HttpServlet {
     private void viewLoan(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         int loanId = Integer.parseInt(request.getParameter("loanId"));
-        String query = "SELECT l.*, b.title as bookTitle, m.name as memberName " +
+        String query = "SELECT l.*, b.title as name, b.Image as image, m.name as memberName " +
                        "FROM loan l " +
                        "JOIN book b ON l.bookid = b.Bid " +
                        "JOIN member m ON l.memberid = m.idOrDept " +
@@ -107,6 +128,13 @@ public class loan extends HttpServlet {
             pstmt.setInt(1, loanId);
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
+                    byte[] imageBytes = rs.getBytes("image");
+                    String imageStr = "";
+                    if (imageBytes != null && imageBytes.length > 0) {
+                    	imageStr = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
+                    } else {
+                    	imageStr = "./assets/img/defaultCover.png"; // Default image URL
+                    }
                     LoanClass loan = new LoanClass(
                         rs.getInt("id"),
                         rs.getInt("bookid"),
@@ -116,8 +144,9 @@ public class loan extends HttpServlet {
                         rs.getDate("dueDate"),
                         rs.getString("status"),
                         rs.getString("notes"),
-                        rs.getString("bookTitle"), // Add book title
-                        rs.getString("memberName") // Add member name
+                        rs.getString("name"), // Add book title
+                        rs.getString("memberName"), // Add member name
+                        imageStr
                     );
 
                     String loanJson = gson.toJson(loan);
@@ -169,7 +198,7 @@ public class loan extends HttpServlet {
                 checkCopiesStmt.setInt(1, bookId);
                 try (ResultSet rs = checkCopiesStmt.executeQuery()) {
                     if (rs.next()) {
-                        int copyAvailable = rs.getInt("copyAvailable");
+                        int copyAvailable = rs.getInt("CopiesAvailable");
                         if (copyAvailable <= 0) {
                             sendError(response, "No copies available for this book.");
                             return;
@@ -263,6 +292,59 @@ public class loan extends HttpServlet {
         }
     }
 
+    private void extendLoan(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int loanId = Integer.parseInt(request.getParameter("loanId"));
+        String query = "UPDATE loan SET dueDate = DATE_ADD(dueDate, INTERVAL 5 DAY) WHERE id = ?";
+
+        try (Connection conn = getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(query)) {
+            pstmt.setInt(1, loanId);
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                sendSuccessResponse(response, "Loan due date extended by 5 days.");
+            } else {
+                sendError(response, "Loan not found or unable to extend due date.");
+            }
+        } catch (SQLException e) {
+            throw new ServletException("Database error", e);
+        }
+    }
+
+    private void markAsReturned(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int loanId = Integer.parseInt(request.getParameter("loanId"));
+        String updateLoanQuery = "UPDATE loan SET status = 'clear', returnDate = NOW() WHERE id = ?";
+        String updateBookQuery = "UPDATE book SET CopiesAvailable = CopiesAvailable + 1 WHERE Bid = (SELECT bookid FROM loan WHERE id = ?)";
+
+        try (Connection conn = getConnection()) {
+            conn.setAutoCommit(false); // Start transaction
+
+            // Update the loan status to 'clear' and set the return date
+            try (PreparedStatement pstmt = conn.prepareStatement(updateLoanQuery)) {
+                pstmt.setInt(1, loanId);
+                int rowsAffected = pstmt.executeUpdate();
+
+                if (rowsAffected == 0) {
+                    sendError(response, "Loan not found or unable to mark as returned.");
+                    return;
+                }
+            }
+
+            // Update the book's available copies
+            try (PreparedStatement pstmt = conn.prepareStatement(updateBookQuery)) {
+                pstmt.setInt(1, loanId);
+                pstmt.executeUpdate();
+            }
+
+            conn.commit(); // Commit the transaction
+            sendSuccessResponse(response, "Loan marked as returned.");
+        } catch (SQLException e) {
+            throw new ServletException("Database error", e);
+        }
+    }
+    
     private void sendJsonResponse(HttpServletResponse response, String json) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

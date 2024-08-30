@@ -5,8 +5,16 @@ const exploreElements = document.querySelectorAll("#explore");
 
 // Function to generate HTML for a book card
 const generateCard = (title, image, author, availability, id) => {
+  // Retrieve the idOrDept from localStorage
+  const idOrDept = localStorage.getItem("idOrDept");
+
+  // Conditionally construct the URL based on the presence of idOrDept
+  const bookUrl = idOrDept
+    ? `/LBMS/book?id=${id}&user=${encodeURIComponent(idOrDept)}`
+    : `/LBMS/book?id=${id}`;
+
   return `
-    <a href="/LBMS/book?id=${id}" target="_self" title="${title}" class="group relative min-w-[250px] transition-all duration-300 w-[300px] h-[460px] bg-white border-2 border-gray-300 rounded-lg shadow-md overflow-hidden">
+    <a href="${bookUrl}" target="_self" title="${title}" class="group relative min-w-[250px] transition-all duration-300 w-[300px] h-[460px] bg-white border-2 border-gray-300 rounded-lg shadow-md overflow-hidden">
       <div class="image w-full h-full absolute top-0 left-0 z-0 overflow-hidden bg-cover transition-transform">
         <img class="w-full h-full object-cover transition-transform group-hover:scale-110" src="${image}" alt="Book">
       </div>
@@ -26,6 +34,7 @@ const generateCard = (title, image, author, availability, id) => {
     </a>
   `;
 };
+
 
 // Fetch book data and populate sections
 fetch('/LBMS/books')

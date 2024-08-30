@@ -94,7 +94,7 @@
             </div>
             <div class="text-center space-y-3">
                 <p class="text-[--secondary] font-semibold text-xl">Saved</p>
-                <p class="text-[--secondary] font-medium text-md">14</p>
+                <p id="savedBooks" class="text-[--secondary] font-medium text-md"></p>
             </div>
             <div class="text-center space-y-3">
                 <p class="text-[--secondary] font-semibold text-xl">Status</p>
@@ -107,7 +107,16 @@
     </div>
 
     <!-- Loan Details -->
-    <div class="mt-6">
+    <div class="mt-6 pb-6 border-b border-gray-200">
+        <h2 class="text-xl font-semibold text-[--secondary] mb-4">Reserved</h2>
+        <section
+            id="reservedContainer"
+            class="w-full flex flex-wrap mx-auto h-full mb-5 gap-5"
+        ></section>
+    </div>
+    
+    <!-- Borrowed Books -->
+    <div class="mt-6 pb-6 border-b border-gray-200">
         <h2 class="text-xl font-semibold text-[--secondary] mb-4">Borrowed</h2>
         <section
             id="borrowedContainer"
@@ -115,7 +124,7 @@
         ></section>
     </div>
     
-    <!-- Profile Details -->
+    <!-- Saved Books -->
     <div class="mt-6">
         <h2 class="text-xl font-semibold text-[--secondary] mb-4">Saved</h2>
         <section
@@ -187,15 +196,97 @@ document.addEventListener('DOMContentLoaded', function () {
             cardContainer.appendChild(bookCard);
         });
     }
+    
+ // Fetch borrowed books from the server
+    function fetchBorrowedBooks(memberId) {
+        const params = new URLSearchParams();
+        params.append('memberId', memberId); // Append memberId to the request parameters
+
+        fetch('/LBMS/getBorrowedBooks', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: params.toString() // Convert params to a query string
+        })
+        .then(response => response.json())
+        .then(data => {
+        	displayBorrowedBooks(data);
+            console.log("Fetched borrowed books:", data); // Debugging line
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+// Display borrowed books
+function displayBorrowedBooks(books) {
+    const cardContainer = document.getElementById('borrowedContainer');
+    cardContainer.innerHTML = '';
+
+    console.log(books)
+    books.forEach(function(book) {
+        const today = new Date();
+        const dueDate = new Date(book.dueDate);
+
+        const isOverdue = dueDate < today;
+
+        console.log(isOverdue)
+        const statusClass = isOverdue ? 'shadow-sm shadow-red-500' : '';
+        
+        const bookCard = document.createElement('a');
+        bookCard.href = '/LBMS/book?id=' + book.bid;  // Use the provided URL format
+        bookCard.target = '_self'; // Ensure the link opens in the same tab
+        bookCard.title = book.title;
+        bookCard.className = 'group relative min-w-[250px]' + statusClass + ' transition-all duration-300 w-[300px] h-[460px] bg-white border-2 border-gray-300 rounded-lg shadow-md overflow-hidden';
+
+        // Build the inner HTML of the book card
+        let cardHTML = '';
+
+        // Check if the book has an image and append it to the card
+        if (book.image) {
+            cardHTML += '<div class="image w-full h-full absolute border-2 border-dashed top-0 left-0 z-0 overflow-hidden bg-cover transition-transform">';
+            cardHTML += '<img class="w-full h-full object-cover transition-transform group-hover:scale-110" src="' + book.image + '" alt="Book">';
+            cardHTML += '</div>';
+        }
+
+        // Add book details
+        cardHTML += '<div class="details p-3 flex flex-col justify-between absolute bottom-0 left-0 right-0 z-10 bg-white transition-transform transform translate-y-full group-hover:translate-y-0">';
+        cardHTML += '<p class="title font-semibold text-gray-800 text-xl line-clamp-2">' + book.title + '</p>';
+        cardHTML += '<div class="AuthorAndAvailability w-full flex justify-between items-center">';
+        cardHTML += '<p class="author font-medium text-lg text-gray-600">' + book.authorName + '</p>';
+
+        // Calculate the due date or availability
+        const statusText = book.dueDate ? `Due: ${book.dueDate} days` : 'N/A';
 
 
+        cardHTML += '<p class="status px-2 py-1 border-2 border-dashed">';
+        cardHTML += statusText;
+        cardHTML += '</p>';
+        cardHTML += '</div>';
+        cardHTML += '</div>';
 
+        bookCard.innerHTML = cardHTML;
+        cardContainer.appendChild(bookCard);
+    });
+}
+
+
+    
     window.removeBook = function (bookId) {
         const savedBooks = JSON.parse(localStorage.getItem('savedBooks')) || [];
         const updatedBooks = savedBooks.filter(id => id !== bookId);
         localStorage.setItem('savedBooks', JSON.stringify(updatedBooks));
         fetchSavedBooks(updatedBooks);
     }
+    
+    function updateSaveBookCount() {
+    	console.log("run");
+        const savedBooks = JSON.parse(localStorage.getItem('savedBooks')) || [];
+        const bookCount = savedBooks.length;
+        document.getElementById('savedBooks').textContent = bookCount;
+    }
+    updateSaveBookCount()
+    fetchBorrowedBooks(localStorage.getItem('idOrDept'))
+
 });
 
 </script>

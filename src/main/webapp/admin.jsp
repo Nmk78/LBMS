@@ -281,7 +281,7 @@ pageEncoding="ISO-8859-1"%>
 <%-- Edit Drawer --%>
     <div
       id="edit-drawer"
-      class="fixed top-0 z-50 right-0 w-80 h-full bg-white shadow-lg transform translate-x-full transition-transform duration-300 z-50"
+      class="fixed top-0 z-50 right-0 w-[340px] h-full bg-white shadow-lg transform translate-x-full transition-transform duration-300 z-50"
     >
       <div id="drawer-container" class="p-6">
         <div class="w-full flex justify-between">
@@ -289,11 +289,150 @@ pageEncoding="ISO-8859-1"%>
             id="drawer-title"
             class="text-2xl text-[--secondary] font-bold mb-4"
           >
-            Add New Book
+            Edit Book
           </h2>
           <button id="edit-drawer-close">Close</button>
         </div>
+	<form action="/LBMS/BookServlet" method="POST" enctype="multipart/form-data">
+			<!-- ID to send underneat -->
+		<input
+              type="hidden"
+              id="bookIdToEdit"
+              value=""
+              name="bookId"
+            />
+          <!-- Title -->
+          <div class="mb-4">
+            <label for="title" class="block text-gray-700">Title</label>
+            <input
+              type="text"
+              id="titleToEdit"
+              name="title"
+              class="w-full p-2 border rounded"
+              required
+            />
+          </div>
 
+          <!-- Author Name -->
+          <div class="mb-4">
+            <label for="author" class="block text-gray-700">Author Name</label>
+            <input
+              type="text"
+              id="authorToEdit"
+              name="author"
+              class="w-full p-2 border rounded"
+            />
+          </div>
+
+          <!-- Add Year -->
+          <!-- Copy -->
+          <div class="mb-4 flex space-x-3">
+            <div class="w-1/2">
+              <label for="addedDate" class="block text-gray-700">Add Year</label>
+              <input
+                type="date"
+                id="addedDateToEdit"
+                name="addedDate"
+                class="w-full p-2 border rounded"
+                required
+              />
+            </div>
+            <div class="w-1/2">
+              <label for="copy" class="block text-gray-700">Count</label>
+              <input
+                type="number"
+                id="copyToEdit"
+                name="copy"
+                class="w-full p-2 border rounded"
+                value="1"
+                required
+              />
+
+
+            </div>
+          </div>
+			<input
+                type="hidden"
+                name="action"
+                value="editBook"
+                required
+              />
+              
+		<div class="w-full flex space-x-3">
+		<!-- Book Shelf -->
+          <div class="mb-4 w-1/2">
+            <label for="bookshelf" class="block text-gray-700"
+              >Book Shelf</label
+            >
+            <input
+              type="text"
+              id="bookshelfToEdit"
+              name="bookshelf"
+              class="w-full p-2 border rounded"
+              required
+            />
+          </div>
+
+          <!-- Acquire By -->
+          <div class="mb-4 w-1/2">
+            <label for="acquireby" class="block text-gray-700"
+              >Acquire By</label
+            >
+            <select
+              id="acquirebyToEdit"
+              name="acquireby"
+              class="w-full p-2 border rounded"
+              required
+            >
+              <option value="Buy" >Buy</option>
+              <option value="Donate">Donate</option>
+            </select>
+          </div>
+		</div>
+
+		<div class="mb-4">
+		    <div class="flex items-center relative justify-center overflow-hidden rounded-md w-full h-1/2">
+		        <label
+		            for="edit-dropzone-file"
+		            class="flex flex-col items-center justify-center w-full h-40 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+		        >
+		            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+		                <svg
+		                    class="w-8 h-8 mb-4 text-gray-500"
+		                    aria-hidden="true"
+		                    xmlns="http://www.w3.org/2000/svg"
+		                    fill="none"
+		                    viewBox="0 0 20 16"
+		                >
+		                    <path
+		                        stroke="currentColor"
+		                        stroke-linecap="round"
+		                        stroke-linejoin="round"
+		                        stroke-width="2"
+		                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"
+		                    />
+		                </svg>
+		                <p class="mb-2 text-sm text-gray-500">
+		                    <span class="font-semibold">Click to upload</span> or drag and drop
+		                </p>
+		                <p class="text-xs text-gray-500">
+		                    PNG, JPG
+		                </p>
+		                <img id="image-preview-to-edit" src="" alt="Image preview" class="hidden mt-4 max-w-full h-auto rounded-md" />
+		            </div>
+		            <input id="edit-dropzone-file" type="file" accept="image/png, image/jpeg" name="image" class="hidden absolute" />
+		        </label>
+		    </div>
+		</div>
+
+          <!-- Submit Button -->
+          <button
+            type="submit"
+            class="w-full bg-[--secondary] hover:shadow-md text-white p-2 rounded"
+          >
+            Save
+          </button>
+        </form>
       </div>
     </div>
 
@@ -386,7 +525,7 @@ pageEncoding="ISO-8859-1"%>
         </form>
       </div>
     </div>
-
+<!-- New Loan Modal -->
     <div
       id="loanModal"
       class="fixed inset-0 bg-gray-800 bg-opacity-75 z-50 flex items-center justify-center hidden"
@@ -471,6 +610,38 @@ pageEncoding="ISO-8859-1"%>
 
       </div>
     </div>
+
+<!-- View Loan Modal -->
+<!-- Modal Structure -->
+<div id="viewLoanModal" class="fixed inset-0 flex items-center justify-center z-50 hidden bg-gray-800 bg-opacity-75">
+  <div class="bg-white relative rounded-lg shadow-lg p-6 w-2/5">
+    <div id="loadingText" class="text-center text-blue-500">
+      Loading...
+    </div>
+    <div id="loanDetails" class="hidden">
+      <h2 class="text-xl font-bold mb-4">Loan Details</h2>
+		<div class="w-full flex space-x-3">
+			<div id="imageContainer" class="w-1/3">
+			</div>
+			<div class="w-2/3 flex flex-col justify-around">
+					<p><strong>Book Name:</strong> <span id="bookName" class="text-lg font-semibold"></span></p>
+				      <p><strong>Loan ID:</strong> <span id="loanId"></span></p>
+				      <p><strong>Member Name:</strong> <span id="memberName"></span></p>
+				      <p><strong>Due Date:</strong> <span id="dueingDate"></span></p>
+			</div>
+		</div>
+      <!-- Add more fields as needed -->
+    </div>
+    <button id="closeModal" class="mt-4 absolute top-0 right-0 text-red-600 px-4 py-2 rounded hover:text-red-700">
+      Close
+    </button>
+	<div class="w-full flex items-end space-x-5">
+		<button id="extendLoanBtn" class="bg-green-500 text-white ml-auto px-4 py-2 mt-4 rounded hover:bg-green-700">Extend by 5 Days</button>
+    	<button id="returnLoanBtn" class="bg-orange-500 text-white px-4 py-2 mt-4 rounded hover:bg-orange-600">Mark as Returned</button>
+	</div>
+  </div>
+</div>
+
 
     <div class="p-6 px-20 space-y-6">
       <!-- Top Boxes -->
@@ -568,7 +739,7 @@ pageEncoding="ISO-8859-1"%>
         <div class="p-4 relative">
 		    <!-- Button to show/hide profile -->
 		    <button id="toggleProfileBtn" 
-		          class="px-4 w-40 h-40 mx-auto py-2 text-blue-700 bg-blue-800 text-white"
+		          class="px-4 w-40 h-40 mx-auto py-2 bg-blue-800 text-white"
 		    >
 		        Show Profile
 		    </button>
@@ -735,6 +906,29 @@ pageEncoding="ISO-8859-1"%>
         }
     });
 
+    document.getElementById('edit-dropzone-file').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const preview = document.getElementById('image-preview-to-edit');
+
+        if (file) {
+            // Create a FileReader to read the file
+            const reader = new FileReader();
+
+            // Set up a function to be called when the reader loads the file
+            reader.onload = function(e) {
+                // Set the src of the image to the data URL of the file
+                preview.src = e.target.result;
+                // Show the image element
+                preview.classList.remove('hidden');
+            };
+
+            // Read the file as a Data URL (base64 encoded)
+            reader.readAsDataURL(file);
+        } else {
+            // Hide the image preview if no file is selected
+            preview.classList.add('hidden');
+        }
+    });
 
     
       // Set Due Data automatically
@@ -845,15 +1039,14 @@ pageEncoding="ISO-8859-1"%>
       }
 
       ///For Rendering Tables
-        function editBook(bookId) {
-          alert("Edit",bookId)
-        }
 
 
       // Function to open the modal
       function toggleModal() {
         document.getElementById("loanModal").classList.toggle("hidden");
       }
+      
+
 
       document.getElementById('toggleProfileBtn').addEventListener('click', function() {
     	    const profileDiv = document.getElementById('adminProfile');
@@ -884,6 +1077,45 @@ pageEncoding="ISO-8859-1"%>
     	    document.getElementById("email").innerText = getFromLocalStorage("email") || "No Email";
     	    document.getElementById("phone").innerText = getFromLocalStorage("phone") || "No Phone";
     	    document.getElementById("referralCode").innerText = getFromLocalStorage("referralCode") || "No Referral Code";
+    	}
+    	
+    	function setDate(date) {
+    	    if (date) {
+    	        const formattedDate = new Date(date).toISOString().split('T')[0]; // Format to YYYY-MM-DD
+    	        return formattedDate;
+    	    }
+    	    return ''; // Return an empty string if no date is provided
+    	}
+
+    	function editBook(book) {
+    	    const editDrawer = document.getElementById("edit-drawer");
+    	    const editDrawerClose = document.getElementById("edit-drawer-close");
+
+    	    console.log("Book To Edit", book);
+
+    	    document.getElementById("bookIdToEdit").value = book.id;
+    	    document.getElementById("titleToEdit").value = book.name;
+    	    document.getElementById("authorToEdit").value = book.author;
+    	    document.getElementById("addedDateToEdit").value = setDate(book.addedDate); // Format and set the date
+    	    document.getElementById("copyToEdit").value = book.copy;
+    	    document.getElementById("bookshelfToEdit").value = book.bookShelf;
+    	    document.getElementById("image-preview-to-edit").src = book.image;
+    	    document.getElementById("image-preview-to-edit").classList.remove("hidden");
+
+    	    const selectElement = document.getElementById("acquireby");
+    	    const valueToSelect = book.acquireBy;
+
+    	    // Check if the value exists in the select options
+    	    const optionExists = Array.from(selectElement.options).some(option => option.value === valueToSelect);
+
+    	    if (optionExists) {
+    	        selectElement.value = valueToSelect; // Set the selected value
+    	    } else {
+    	        console.error('Option not found:', valueToSelect); // Handle the case where the value does not exist
+    	    }
+
+    	    editDrawer.classList.toggle("translate-x-full");
+    	    editDrawer.classList.toggle("translate-x-0");
     	}
 
 

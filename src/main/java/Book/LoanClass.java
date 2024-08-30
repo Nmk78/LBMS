@@ -11,10 +11,12 @@ public class LoanClass {
     private Date dueDate;
     private String status;
     private String notes;
-    private String bookTitle; // Add this field
+    private String name; // Add this field
     private String memberName; // Add this field
+	private String image;
     // Constructor
-    public LoanClass(int id, int bookId, String memberId, Date loanDate, Date returnDate, Date dueDate, String status, String notes, String bookTitle, String memberName) {
+ // Modify your LoanClass constructor to accept the image field
+    public LoanClass(int id, int bookId, String memberId, Date loanDate, Date returnDate, Date dueDate, String status, String notes, String bookTitle, String memberName, String image) {
         this.id = id;
         this.bookId = bookId;
         this.memberId = memberId;
@@ -23,9 +25,11 @@ public class LoanClass {
         this.dueDate = dueDate;
         this.status = status;
         this.notes = notes;
-        this.bookTitle = bookTitle;
+        this.name = bookTitle;
         this.memberName = memberName;
+        this.image = image; // Assign the image
     }
+
 
     // Default constructor
     public LoanClass() {
