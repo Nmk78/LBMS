@@ -3,6 +3,18 @@ const popularElements = document.querySelectorAll("#popular");
 const peopleChoicesElements = document.querySelectorAll("#peopleChoices");
 const exploreElements = document.querySelectorAll("#explore");
 
+const loadingAnimation = document.getElementById("loadingAnimation");
+
+// Function to show or hide the loading animation
+const setLoadingVisibility = (isVisible) => {
+  if (isVisible) {
+    loadingAnimation.classList.remove("hidden");
+  } else {
+    loadingAnimation.classList.add("hidden");
+  }
+};
+
+
 // Function to generate HTML for a book card
 const generateCard = (title, image, author, availability, id) => {
   // Retrieve the idOrDept from localStorage
@@ -35,36 +47,32 @@ const generateCard = (title, image, author, availability, id) => {
   `;
 };
 
+// Function to populate a section with books
+const populateSection = (elements, books) => {
+  elements.forEach(element => {
+    element.innerHTML = ''; // Clear existing content
+    books.forEach(book => {
+      const cardHTML = generateCard(book.name, book.image, book.author, book.availability, book.id);
+      element.innerHTML += cardHTML;
+    });
+  });
+};
 
-// Fetch book data and populate sections
-fetch('/LBMS/books')
-  .then(response => response.json())
-  .then(data => {
-    console.log(data);
-    const books = data;
+// Function to fetch and populate books for a specific section
+const fetchBooksForSection = (url, elements) => {
+  setLoadingVisibility(true); // Show loading animation
 
-    // Immediately Invoked Function Expression to handle books
-    (function(books) {
-      // Clear existing content
-      popularElements.forEach(element => element.innerHTML = '');
-      peopleChoicesElements.forEach(element => element.innerHTML = '');
-      exploreElements.forEach(element => element.innerHTML = '');
+  fetch(url)
+    .then(response => response.json())
+    .then(data => {
+      console.log(`Books from ${url}:`, data);
+      populateSection(elements, data);
+    })
+    .catch(error => console.error(`Error fetching books from ${url}:`, error))
+    .finally(() => setLoadingVisibility(false)); // Hide loading animation after fetch is complete
+};
 
-      // Populate each section
-      books.slice(0, 20).forEach(book => {
-        const cardHTML = generateCard(book.name, book.image, book.author, book.availability, book.id);
-        popularElements.forEach(element => element.innerHTML += cardHTML);
-      });
-
-      books.slice(20, 30).forEach(book => {
-        const cardHTML = generateCard(book.name, book.image, book.author, book.availability, book.id);
-        peopleChoicesElements.forEach(element => element.innerHTML += cardHTML);
-      });
-
-      books.forEach(book => {
-        const cardHTML = generateCard(book.name, book.image, book.author, book.availability, book.id);
-        exploreElements.forEach(element => element.innerHTML += cardHTML);
-      });
-    })(books);  // Pass the books data to the IIFE
-  })
-  .catch(error => console.error('Error fetching books:', error));
+// Fetch and populate books for each section
+fetchBooksForSection('/LBMS/books', popularElements);
+fetchBooksForSection('/LBMS/mostRatedBooks', peopleChoicesElements);
+fetchBooksForSection('/LBMS/popularBooks', exploreElements);

@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -168,10 +169,10 @@ public class loan extends HttpServlet {
         java.sql.Date dueDate = java.sql.Date.valueOf(request.getParameter("dueDate"));
 
         String checkBlacklistQuery = "SELECT blacklist FROM member WHERE idOrDept = ?";
-        String checkCopiesQuery = "SELECT copyAvailable FROM book WHERE Bid = ?";
+        String checkCopiesQuery = "SELECT CopiesAvailable FROM book WHERE Bid = ?";
         String checkBorrowedBooksQuery = "SELECT COUNT(*) AS borrowedCount FROM loan WHERE memberid = ? AND returnDate IS NULL";
         String insertLoanQuery = "INSERT INTO loan (bookid, memberid, loanDate, dueDate) VALUES (?, ?, ?, ?)";
-        String updateCopiesQuery = "UPDATE book SET copyAvailable = copyAvailable - 1 WHERE Bid = ?";
+        String updateCopiesQuery = "UPDATE book SET CopiesAvailable = CopiesAvailable - 1 WHERE Bid = ?";
 
         try (Connection conn = getConnection()) {
             conn.setAutoCommit(false); // Start transaction
@@ -198,8 +199,8 @@ public class loan extends HttpServlet {
                 checkCopiesStmt.setInt(1, bookId);
                 try (ResultSet rs = checkCopiesStmt.executeQuery()) {
                     if (rs.next()) {
-                        int copyAvailable = rs.getInt("CopiesAvailable");
-                        if (copyAvailable <= 0) {
+                        int CopiesAvailable = rs.getInt("CopiesAvailable");
+                        if (CopiesAvailable <= 0) {
                             sendError(response, "No copies available for this book.");
                             return;
                         }
@@ -237,7 +238,8 @@ public class loan extends HttpServlet {
             }
 
             conn.commit(); // Commit the transaction
-            sendSuccessResponse(response, "Loan added successfully");
+        	String message = "Loan added successfully.";
+            sendSuccessResponse(response,message);
         } catch (SQLException e) {
             e.printStackTrace();
             throw new ServletException("Database error", e);
@@ -271,7 +273,7 @@ public class loan extends HttpServlet {
             pstmt.setInt(8, loanId);
             pstmt.executeUpdate();
 
-            sendSuccessResponse(response, "Loan updated successfully");
+            sendSuccessResponse(response,"Loan updated successfully");
         } catch (SQLException e) {
             throw new ServletException("Database error", e);
         }
@@ -286,7 +288,7 @@ public class loan extends HttpServlet {
             pstmt.setInt(1, loanId);
             pstmt.executeUpdate();
 
-            sendSuccessResponse(response, "Loan deleted successfully");
+            sendSuccessResponse(response,"Loan deleted successfully");
         } catch (SQLException e) {
             throw new ServletException("Database error", e);
         }
@@ -303,7 +305,8 @@ public class loan extends HttpServlet {
             int rowsAffected = pstmt.executeUpdate();
 
             if (rowsAffected > 0) {
-                sendSuccessResponse(response, "Loan due date extended by 5 days.");
+            	String message = "Loan due date extended by 5 days.";
+                sendSuccessResponse(response,"{\"success\": true, \"message\": \"" + message + "\"}");
             } else {
                 sendError(response, "Loan not found or unable to extend due date.");
             }
@@ -339,7 +342,8 @@ public class loan extends HttpServlet {
             }
 
             conn.commit(); // Commit the transaction
-            sendSuccessResponse(response, "Loan marked as returned.");
+        	String message = "Loan marked as returned.";
+            sendSuccessResponse(response,"{\"success\": true, \"message\": \"" + message + "\"}");
         } catch (SQLException e) {
             throw new ServletException("Database error", e);
         }
@@ -355,21 +359,19 @@ public class loan extends HttpServlet {
     }
 
     private void sendSuccessResponse(HttpServletResponse response, String message) throws IOException {
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            out.print("{\"success\": true, \"message\": \"" + message + "\"}");
-            out.flush();
-        }
+        // URL encode the message to ensure it is safe to use in the URL
+        String encodedMessage = URLEncoder.encode(message, "UTF-8");
+        
+        // Redirect to admin.jsp with the success message as a URL parameter
+        response.sendRedirect("admin.jsp?message=" + encodedMessage);
+    }
+    
+    private void sendError(HttpServletResponse response, String errorMessage) throws IOException {
+        // URL encode the error message
+        String encodedErrorMessage = URLEncoder.encode(errorMessage, "UTF-8");
+        
+        // Redirect to admin.jsp with the error message as a URL parameter
+        response.sendRedirect("admin.jsp?message=" + encodedErrorMessage);
     }
 
-    private void sendError(HttpServletResponse response, String errorMessage) throws IOException {
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-        response.setContentType("application/json");
-        response.setCharacterEncoding("UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            out.print("{\"success\": false, \"error\": \"" + errorMessage + "\"}");
-            out.flush();
-        }
-    }
 }

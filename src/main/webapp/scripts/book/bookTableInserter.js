@@ -48,20 +48,83 @@ function formatDate(dateString) {
 
 document.getElementById("extendLoanBtn").addEventListener("click", function() {
     const loanId = document.getElementById("loanId").textContent;
+    const extendButton = this; // Reference to the button
 
     fetch(`/LBMS/loan?action=extend&loanId=${loanId}`, { method: 'POST' })
-        .then(response => response.json())
+        //.then(response => response.json())
+		.then(response => response)
         .then(data => {
-            if (data.success) {
-                alert("Loan extended successfully!");
-                // Optionally, update the due date in the modal
-                document.getElementById("dueDate").textContent = formatDate(new Date(new Date().setDate(new Date().getDate() + 5)));
+			console.log(data)
+            if (data.status == 200) {
+				
+                // Change the button text and disable it
+                extendButton.textContent = "Loan Extended";
+                extendButton.disabled = true;
+
+                
+                // Update the URL with a success message parameter
+                const url = new URL(window.location);
+                url.searchParams.set('message', "extended");
+                window.history.replaceState({}, '', url);
+
+                // Update the due date in the modal or UI
+                const newDueDate = new Date();
+                newDueDate.setDate(newDueDate.getDate() + 5);
+                document.getElementById("dueDate").textContent = formatDate(newDueDate);
+
             } else {
                 alert(data.message);
             }
         })
         .catch(error => console.error('Error extending loan:', error));
 });
+
+// Function to format date
+function formatDate(dateString) {
+    const options = { month: 'short', day: 'numeric', year: 'numeric' };
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', options);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+    const url = new URL(window.location);
+    const message = url.searchParams.get('message');
+    
+    if (message) {
+        showToast(decodeURIComponent(message));
+        
+        // Clear the message parameter from the URL after displaying it
+        url.searchParams.delete('message');
+        window.history.replaceState({}, '', url);
+    }
+});
+
+function showToast(message) {
+    const toast = document.getElementById("toast");
+
+    // Set the message and display the toast
+    toast.innerHTML = message;
+    toast.classList.remove("hidden", "opacity-0");
+    toast.classList.add("opacity-100");
+
+    // Hide the toast after 5 seconds
+    setTimeout(() => {
+        toast.classList.remove("opacity-100");
+        toast.classList.add("opacity-0");
+
+        // Clear the message after the transition (0.5s) is done
+        setTimeout(() => {
+            toast.classList.add("hidden");
+            toast.innerHTML = ""; // Clear the message
+
+            // Clear the message parameter from the URL
+            const url = new URL(window.location);
+            url.searchParams.delete('message');
+            window.history.replaceState({}, '', url);
+        }, 500);
+    }, 5000);
+}
+
 
 document.getElementById("returnLoanBtn").addEventListener("click", function() {
     const loanId = document.getElementById("loanId").textContent;

@@ -1008,36 +1008,51 @@ pageEncoding="ISO-8859-1"%>
           editDrawer.classList.toggle("translate-x-0");
         });
       });
+      
+      
 
-      const message =
-        '<%= request.getAttribute("message") != null ? request.getAttribute("message").toString() : "" %>';
+      function showToast(message) {
+    	    const toast = document.getElementById("toast");
+
+    	    // Set the message and display the toast
+    	    toast.innerHTML = message;
+    	    toast.classList.remove("hidden", "opacity-0");
+    	    toast.classList.add("opacity-100");
+
+    	    // Hide the toast after 5 seconds
+    	    setTimeout(() => {
+    	        toast.classList.remove("opacity-100");
+    	        toast.classList.add("opacity-0");
+
+    	        // Clear the message after the transition (0.5s) is done
+    	        setTimeout(() => {
+    	            toast.classList.add("hidden");
+    	            toast.innerHTML = ""; // Clear the message
+
+    	            // Clear the message parameter from the URL
+    	            const url = new URL(window.location);
+    	            url.searchParams.delete('message');
+    	            window.history.replaceState({}, '', url);
+    	        }, 500);
+    	    }, 5000);
+    	}
+
+   // Function to get URL parameter by name
+      function getURLParameter(name) {
+          const urlParams = new URLSearchParams(window.location.search);
+          return urlParams.get(name);
+      }
+
+      // Get the message from URL parameters
+      const message = getURLParameter('message');
 
       console.log("message = ", message);
-      // Function to show the toast
-      function showToast(message) {
-        const toast = document.getElementById("toast");
-
-        toast.innerHTML = message;
-        toast.classList.remove("hidden", "opacity-0");
-        toast.classList.add("opacity-100");
-
-        // Hide after 5 seconds
-        setTimeout(() => {
-            toast.classList.remove("opacity-100");
-          toast.classList.add("opacity-0");
-
-          // Remove the element after the transition (0.5s) is done
-          setTimeout(() => {
-            toast.classList.add("hidden");
-          }, 500);
-        }, 5000);
-      }
 
       // Show the toast if there's a message
       if (message) {
-        showToast(message);
+          showToast(message);
       }
-
+      
       ///For Rendering Tables
 
 

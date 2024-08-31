@@ -150,7 +150,7 @@ private void addBook(HttpServletRequest request, Connection conn, HttpServletRes
         int rowsAffected = insertBookStmt.executeUpdate();
         String message = rowsAffected > 0 ? "Book added successfully" : "Failed to add book";
         request.setAttribute("message", message);
-        request.getRequestDispatcher("/admin.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/admin.jsp" + "?message=" + URLEncoder.encode(message, "UTF-8"));
     }
 }
 
@@ -247,7 +247,7 @@ private void editBook(HttpServletRequest request, Connection conn, HttpServletRe
         int rowsAffected = updateBookStmt.executeUpdate();
         String message = rowsAffected > 0 ? "Book updated successfully" : "Failed to update book";
         request.setAttribute("message", message);
-        request.getRequestDispatcher("/admin.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/admin.jsp" + "?message=" + URLEncoder.encode(message, "UTF-8"));
     }
 
 }
@@ -261,7 +261,8 @@ private void deleteBook(HttpServletRequest request, Connection conn, HttpServlet
         int rowsAffected = deleteBookStmt.executeUpdate();
         String message = rowsAffected > 0 ? "Book deleted successfully" : "Failed to delete book";
         request.setAttribute("message", message);
-        request.getRequestDispatcher("/admin.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/admin.jsp" + "?message=" + URLEncoder.encode(message, "UTF-8"));
+
     }
 }
 

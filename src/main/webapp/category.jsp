@@ -18,7 +18,7 @@
     
     <div class="max-w-5xl mx-auto flex justify-between items-center mt-5 mb-2">
         <p class="text-3xl font-semibold text-[--secondary]">Explore</p>
-        <a href="/LBMS/category" class="font-semibold h-10 text-xl text-center text-[--secondary] hover:underline">See More >></a>
+        <a href="/LBMS/category" class="font-semibold h-10 text-xl text-center text-[--secondary] hover:underline">All Category >></a>
     </div>
     
     <section id="explore" class="max-w-5xl flex flex-wrap justify-between mx-auto h-full mb-5 gap-5">

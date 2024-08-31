@@ -2,6 +2,7 @@ package post;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -76,11 +77,12 @@ public class PostServlet extends HttpServlet {
             if (row > 0) {
 	                String message = "Post added successfully";
 	                request.setAttribute("message", message);
-	                request.getRequestDispatcher("/admin.jsp").forward(request, response);
+	                response.sendRedirect(request.getContextPath() + "/admin.jsp" + "?message=" + URLEncoder.encode(message, "UTF-8"));
                 } else {
                     String message = "Failed to add post";
                     request.setAttribute("message", message);
-                    request.getRequestDispatcher("/admin.jsp").forward(request, response);            }
+                    response.sendRedirect(request.getContextPath() + "/admin.jsp" + "?message=" + URLEncoder.encode(message, "UTF-8"));
+                }
         } catch (Exception ex) {
             throw new ServletException("Error: " + ex.getMessage(), ex);
         }
@@ -107,7 +109,8 @@ public class PostServlet extends HttpServlet {
             statement.setInt(4, postId);
             int row = statement.executeUpdate();
             if (row > 0) {
-                response.getWriter().write("Post updated successfully");
+                request.setAttribute("message", "Post updated successfully");
+                request.getRequestDispatcher("/admin.jsp").forward(request, response);
             } else {
                 response.getWriter().write("Failed to update post");
             }
@@ -124,7 +127,9 @@ public class PostServlet extends HttpServlet {
             statement.setInt(1, postId);
             int row = statement.executeUpdate();
             if (row > 0) {
-                response.getWriter().write("Post deleted successfully");
+                request.setAttribute("message", "Post deleted successfully");
+                request.getRequestDispatcher("/admin.jsp").forward(request, response);
+                
             } else {
                 response.getWriter().write("Failed to delete post");
             }
